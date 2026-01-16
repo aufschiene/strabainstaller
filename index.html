@@ -10,229 +10,283 @@
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1f2d 100%);
+      background: linear-gradient(135deg, #1a2332 0%, #2a3a4a 50%, #1e2d3d 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 30px;
       color: #fff;
     }
     
     .container {
-      background: rgba(255, 240, 93, 0.05);
-      border: 1px solid rgba(255, 240, 93, 0.2);
-      border-radius: 24px;
-      padding: 50px 60px;
-      text-align: center;
-      max-width: 750px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px 50px;
+      max-width: 1100px;
       width: 100%;
       backdrop-filter: blur(10px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     }
-    
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      margin-bottom: 35px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
     .logo {
-      max-width: 280px;
-      margin-bottom: 25px;
-      filter: drop-shadow(0 4px 12px rgba(255, 240, 93, 0.2));
+      max-width: 200px;
+      flex-shrink: 0;
     }
-    
-    h1 {
-      color: #fff5d5;
-      font-size: 2.2em;
-      margin-bottom: 8px;
-      font-weight: 700;
+
+    .header-text {
+      flex: 1;
     }
-    
-    .subtitle {
-      color: #aaa;
-      font-size: 1em;
-      margin-bottom: 25px;
+
+    .header-text h1 {
+      color: #fff;
+      font-size: 1.6em;
+      font-weight: 600;
+      margin-bottom: 12px;
     }
 
     .announcement {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 237, 74, 0.1) 100%);
-      border: 1px solid rgba(255, 215, 0, 0.3);
-      border-radius: 16px;
-      padding: 25px 30px;
-      margin-bottom: 30px;
-      text-align: left;
-    }
-
-    .announcement-header {
-      color: #ffd700;
-      font-weight: 700;
-      font-size: 1em;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .announcement p {
-      color: #ddd;
-      font-size: 0.95em;
-      line-height: 1.7;
-    }
-
-    .announcement .signature {
-      margin-top: 15px;
-      color: #ffd700;
-      font-weight: 600;
+      color: #9aa8b8;
       font-size: 0.9em;
+      line-height: 1.6;
     }
-    
+
+    .announcement .highlight {
+      color: #f0c040;
+      font-weight: 500;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .install-section {
+      text-align: center;
+      padding: 30px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      margin-bottom: 25px;
+    }
+
     .install-button {
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+      background: linear-gradient(135deg, #f0c040 0%, #ffd966 100%);
       color: #1a1a2e;
       border: none;
-      padding: 18px 50px;
-      font-size: 1.2em;
-      font-weight: 700;
-      border-radius: 14px;
+      padding: 16px 45px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+      box-shadow: 0 6px 20px rgba(240, 192, 64, 0.25);
     }
     
     .install-button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 35px rgba(255, 215, 0, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(240, 192, 64, 0.35);
     }
-    
-    .install-button:active {
-      transform: translateY(0);
-    }
-    
-    .steps {
-      text-align: left;
-      margin-top: 40px;
-      padding: 30px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .steps h3 {
-      color: #ffd700;
-      margin-bottom: 18px;
-      font-size: 1.1em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .steps ol {
-      color: #ccc;
-      padding-left: 22px;
-      line-height: 2;
-    }
-    
-    .steps li {
-      margin-bottom: 8px;
-    }
-    
-    .steps li::marker {
-      color: #ffd700;
-      font-weight: bold;
-    }
-    
+
     .warning {
-      margin-top: 30px;
-      padding: 20px 25px;
-      background: rgba(255, 150, 0, 0.15);
-      border: 1px solid rgba(255, 150, 0, 0.3);
-      border-radius: 12px;
-      font-size: 0.9em;
-      color: #ffcc80;
-      text-align: left;
-    }
-    
-    .warning-icon {
-      margin-right: 8px;
+      padding: 15px 18px;
+      background: rgba(240, 180, 64, 0.1);
+      border: 1px solid rgba(240, 180, 64, 0.2);
+      border-radius: 10px;
+      font-size: 0.85em;
+      color: #c9b896;
     }
 
     .warning ul {
-      margin-top: 10px;
-      padding-left: 20px;
+      margin-top: 8px;
+      padding-left: 18px;
+      line-height: 1.7;
     }
 
-    .warning li {
-      margin-bottom: 6px;
+    .right-column h3 {
+      color: #f0c040;
+      margin-bottom: 20px;
+      font-size: 1em;
+      font-weight: 600;
     }
-    
-    .browser-note {
-      margin-top: 20px;
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .step {
+      display: flex;
+      gap: 15px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      background: rgba(240, 192, 64, 0.15);
+      color: #f0c040;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
       font-size: 0.85em;
-      color: #888;
-    }
-    
-    .version {
-      margin-top: 30px;
-      font-size: 0.8em;
-      color: #666;
+      flex-shrink: 0;
     }
 
-    /* ESP Web Tools Button Styling */
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content p {
+      color: #b8c4d0;
+      font-size: 0.9em;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .step-content .note {
+      color: #8a96a3;
+      font-size: 0.8em;
+      font-style: italic;
+    }
+
+    .step-screenshot {
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 200px;
+      opacity: 0.9;
+    }
+
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8em;
+      color: #6b7785;
+    }
+
     esp-web-install-button {
       display: block;
+    }
+
+    @media (max-width: 900px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .main-content {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="logo.png" alt="Straba Logo" class="logo">
-    <h1>Straba Installer</h1>
-    <div class="announcement">
-      <div class="announcement-header">
-        🎉 Neu: Software-Version 1.1
+    <div class="header">
+      <img src="logo.png" alt="Straba Logo" class="logo">
+      <div class="header-text">
+        <h1>Straba Installer <span style="color: #f0c040; font-size: 0.7em;">v1.1</span></h1>
+        <p class="announcement">
+          <span class="highlight">Neu:</span> Software-Version 1.1 mit zahlreichen Verbesserungen und neuen Features. 
+          Aktualisiert euer Gerät und profitiert direkt davon. Viel Freude mit dem Update! — <span class="highlight">Euer Straba-Team</span>
+        </p>
       </div>
-      <p>
-        Liebe Straba-User:innen, es ist soweit: Wir freuen uns sehr, euch Software-Version 1.1 für euren Straba zur Verfügung stellen zu können. Dieses Update bringt zahlreiche neue Funktionen, Verbesserungen und Optimierungen mit sich. Aktualisiert euer Gerät und profitiert direkt von den neuen Features.
-      </p>
-      <p class="signature">
-        Vielen Dank, dass ihr Teil der Straba-Community seid – viel Freude mit dem Update!<br>
-        Euer Straba-Team
-      </p>
     </div>
-    
-    <esp-web-install-button manifest="manifest.json">
-      <button class="install-button" slot="activate">
-        Update installieren
-      </button>
-      <span slot="unsupported">
-        <div class="warning">
-          <span class="warning-icon">⚠️</span>
-          Dein Browser unterstützt Web Serial nicht. Bitte verwende <strong>Chrome</strong> oder <strong>Edge</strong>.
+
+    <div class="main-content">
+      <div class="left-column">
+        <div class="install-section">
+          <esp-web-install-button manifest="manifest.json">
+            <button class="install-button" slot="activate">
+              Update installieren
+            </button>
+            <span slot="unsupported">
+              <div class="warning">
+                ⚠️ Dein Browser unterstützt Web Serial nicht. Bitte verwende <strong>Chrome</strong> oder <strong>Edge</strong>.
+              </div>
+            </span>
+          </esp-web-install-button>
         </div>
-      </span>
-    </esp-web-install-button>
 
-    <div class="steps">
-      <h3>📋 So geht's:</h3>
-      <ol>
-        <li>Straba mit einem <strong>USB-A auf USB-C Kabel</strong> an den Computer anschließen</li>
-        <li>Oben auf <strong>"Update installieren"</strong> klicken</li>
-        <li>Im Popup den <strong>USB-Port</strong> auswählen</li>
-        <li>Warten bis die Installation abgeschlossen ist</li>
-        <li>Fertig! Straba startet automatisch neu 🎉</li>
-      </ol>
+        <div class="warning">
+          <strong>💡 Tipps bei Problemen:</strong>
+          <ul>
+            <li>USB-Kabel einmal aus- und wieder einstecken</li>
+            <li><strong>USB-A auf USB-C Kabel</strong> verwenden</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="right-column">
+        <h3>📋 So geht's:</h3>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <p>Straba mit einem <strong>USB-A auf USB-C Kabel</strong> an den Computer anschließen</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <p>Auf <strong>"Update installieren"</strong> klicken</p>
+              <p class="note">Es öffnet sich ein Popup (auf Englisch)</p>
+              <img src="screenshot1.png" alt="Version 1.1 Dialog" class="step-screenshot">
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <p><strong>"Install Version 1.1"</strong> auswählen, dann im Browser den USB-Port wählen</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <p>Bei <strong>"Erase device"</strong> einfach auf <strong>Next</strong> klicken (nicht ankreuzen!)</p>
+              <img src="screenshot2.png" alt="Erase Device Dialog" class="step-screenshot">
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <p>Warten bis fertig – Straba startet automatisch neu 🎉</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="warning">
-      <span class="warning-icon">💡</span>
-      <strong>Tipps bei Problemen:</strong>
-      <ul>
-        <li>Falls der Port nicht erscheint, stecke das <strong>USB-Kabel einmal aus und wieder ein</strong>.</li>
-        <li>Verwende ein <strong>USB-A auf USB-C Kabel</strong> (kein USB-C auf USB-C).</li>
-      </ul>
+    <div class="footer">
+      <span>Funktioniert mit Chrome, Edge und Opera</span>
+      <span>Firmware Version 1.1.0</span>
     </div>
-
-    <p class="browser-note">
-      Funktioniert mit Chrome, Edge und Opera auf Desktop
-    </p>
-
-    <p class="version">Firmware Version 1.1.0</p>
   </div>
 </body>
 </html>
