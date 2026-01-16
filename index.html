@@ -25,16 +25,16 @@
       border-radius: 24px;
       padding: 50px 40px;
       text-align: center;
-      max-width: 450px;
+      max-width: 500px;
       width: 100%;
       backdrop-filter: blur(10px);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     }
     
     .logo {
-      font-size: 5em;
-      margin-bottom: 20px;
-      filter: drop-shadow(0 4px 8px rgba(255, 240, 93, 0.3));
+      max-width: 220px;
+      margin-bottom: 25px;
+      filter: drop-shadow(0 4px 12px rgba(255, 240, 93, 0.2));
     }
     
     h1 {
@@ -47,7 +47,39 @@
     .subtitle {
       color: #aaa;
       font-size: 1em;
-      margin-bottom: 35px;
+      margin-bottom: 25px;
+    }
+
+    .announcement {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 237, 74, 0.1) 100%);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .announcement-header {
+      color: #ffd700;
+      font-weight: 700;
+      font-size: 1em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .announcement p {
+      color: #ddd;
+      font-size: 0.92em;
+      line-height: 1.6;
+    }
+
+    .announcement .signature {
+      margin-top: 15px;
+      color: #ffd700;
+      font-weight: 600;
+      font-size: 0.9em;
     }
     
     .install-button {
@@ -113,10 +145,20 @@
       border-radius: 12px;
       font-size: 0.9em;
       color: #ffcc80;
+      text-align: left;
     }
     
     .warning-icon {
       margin-right: 8px;
+    }
+
+    .warning ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    .warning li {
+      margin-bottom: 6px;
     }
     
     .browser-note {
@@ -139,9 +181,22 @@
 </head>
 <body>
   <div class="container">
-    <div class="logo">🚋</div>
+    <img src="logo.png" alt="Straba Logo" class="logo">
     <h1>Straba Installer</h1>
     <p class="subtitle">Firmware für dein Wiener Linien Display</p>
+
+    <div class="announcement">
+      <div class="announcement-header">
+        🎉 Neu: Software-Version 1.1
+      </div>
+      <p>
+        Liebe Straba-User:innen, es ist soweit: Wir freuen uns sehr, euch Software-Version 1.1 für euren Straba zur Verfügung stellen zu können. Dieses Update bringt zahlreiche neue Funktionen, Verbesserungen und Optimierungen mit sich. Aktualisiert euer Gerät und profitiert direkt von den neuen Features.
+      </p>
+      <p class="signature">
+        Vielen Dank, dass ihr Teil der Straba-Community seid – viel Freude mit dem Update!<br>
+        Euer Straba-Team
+      </p>
+    </div>
     
     <esp-web-install-button manifest="manifest.json">
       <button class="install-button" slot="activate">
@@ -158,7 +213,7 @@
     <div class="steps">
       <h3>📋 So geht's:</h3>
       <ol>
-        <li>Straba per <strong>USB</strong> an den Computer anschließen</li>
+        <li>Straba mit einem <strong>USB-A auf USB-C Kabel</strong> an den Computer anschließen</li>
         <li>Oben auf <strong>"Firmware installieren"</strong> klicken</li>
         <li>Im Popup den <strong>USB-Port</strong> auswählen</li>
         <li>Warten bis die Installation abgeschlossen ist</li>
@@ -168,14 +223,18 @@
 
     <div class="warning">
       <span class="warning-icon">💡</span>
-      <strong>Tipp:</strong> Falls der Port nicht erscheint, drücke den <strong>BOOT</strong>-Knopf am Straba während du das USB-Kabel ansteckst.
+      <strong>Tipps bei Problemen:</strong>
+      <ul>
+        <li>Falls der Port nicht erscheint, stecke das <strong>USB-Kabel einmal aus und wieder ein</strong>.</li>
+        <li>Verwende ein <strong>USB-A auf USB-C Kabel</strong> (kein USB-C auf USB-C).</li>
+      </ul>
     </div>
 
     <p class="browser-note">
       Funktioniert mit Chrome, Edge und Opera auf Desktop
     </p>
 
-    <p class="version">Firmware Version 1.0.0</p>
+    <p class="version">Firmware Version 1.1.0</p>
   </div>
 </body>
 </html>
