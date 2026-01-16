@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Straba Firmware Installer</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1f2d 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      background: rgba(255, 240, 93, 0.05);
+      border: 1px solid rgba(255, 240, 93, 0.2);
+      border-radius: 24px;
+      padding: 50px 40px;
+      text-align: center;
+      max-width: 450px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    
+    .logo {
+      font-size: 5em;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 4px 8px rgba(255, 240, 93, 0.3));
+    }
+    
+    h1 {
+      color: #fff5d5;
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      color: #aaa;
+      font-size: 1em;
+      margin-bottom: 35px;
+    }
+    
+    .install-button {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+      color: #1a1a2e;
+      border: none;
+      padding: 18px 50px;
+      font-size: 1.2em;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+    }
+    
+    .install-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(255, 215, 0, 0.4);
+    }
+    
+    .install-button:active {
+      transform: translateY(0);
+    }
+    
+    .steps {
+      text-align: left;
+      margin-top: 40px;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .steps h3 {
+      color: #ffd700;
+      margin-bottom: 18px;
+      font-size: 1.1em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .steps ol {
+      color: #ccc;
+      padding-left: 22px;
+      line-height: 1.8;
+    }
+    
+    .steps li {
+      margin-bottom: 8px;
+    }
+    
+    .steps li::marker {
+      color: #ffd700;
+      font-weight: bold;
+    }
+    
+    .warning {
+      margin-top: 30px;
+      padding: 15px 20px;
+      background: rgba(255, 150, 0, 0.15);
+      border: 1px solid rgba(255, 150, 0, 0.3);
+      border-radius: 12px;
+      font-size: 0.9em;
+      color: #ffcc80;
+    }
+    
+    .warning-icon {
+      margin-right: 8px;
+    }
+    
+    .browser-note {
+      margin-top: 20px;
+      font-size: 0.85em;
+      color: #888;
+    }
+    
+    .version {
+      margin-top: 30px;
+      font-size: 0.8em;
+      color: #666;
+    }
+
+    /* ESP Web Tools Button Styling */
+    esp-web-install-button {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🚋</div>
+    <h1>Straba Installer</h1>
+    <p class="subtitle">Firmware für dein Wiener Linien Display</p>
+    
+    <esp-web-install-button manifest="manifest.json">
+      <button class="install-button" slot="activate">
+        ⚡ Firmware installieren
+      </button>
+      <span slot="unsupported">
+        <div class="warning">
+          <span class="warning-icon">⚠️</span>
+          Dein Browser unterstützt Web Serial nicht. Bitte verwende <strong>Chrome</strong> oder <strong>Edge</strong>.
+        </div>
+      </span>
+    </esp-web-install-button>
+
+    <div class="steps">
+      <h3>📋 So geht's:</h3>
+      <ol>
+        <li>Straba per <strong>USB</strong> an den Computer anschließen</li>
+        <li>Oben auf <strong>"Firmware installieren"</strong> klicken</li>
+        <li>Im Popup den <strong>USB-Port</strong> auswählen</li>
+        <li>Warten bis die Installation abgeschlossen ist</li>
+        <li>Fertig! Straba startet automatisch neu 🎉</li>
+      </ol>
+    </div>
+
+    <div class="warning">
+      <span class="warning-icon">💡</span>
+      <strong>Tipp:</strong> Falls der Port nicht erscheint, drücke den <strong>BOOT</strong>-Knopf am Straba während du das USB-Kabel ansteckst.
+    </div>
+
+    <p class="browser-note">
+      Funktioniert mit Chrome, Edge und Opera auf Desktop
+    </p>
+
+    <p class="version">Firmware Version 1.0.0</p>
+  </div>
+</body>
+</html>
