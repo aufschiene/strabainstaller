@@ -1,14 +1,10 @@
 {
-  "name": "Straba Firmware",
-  "version": "1.0.0",
-  "new_install_skip_erase": true,
+  "name": "Version 1.1",
   "builds": [
     {
-      "chipFamily": "ESP32-S3",
+      "chipFamily": "ESP32",
       "parts": [
-        { "path": "bootloader.bin", "offset": 0 },
-        { "path": "partitions.bin", "offset": 32768 },
-        { "path": "firmware.bin", "offset": 65536 }
+        { "path": "firmware.bin", "offset": 0 }
       ]
     }
   ]
