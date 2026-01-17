@@ -2,7 +2,7 @@
   "name": "Version 1.1",
   "builds": [
     {
-      "chipFamily": "ESP32",
+      "chipFamily": "ESP32-S3",
       "parts": [
         { "path": "firmware.bin", "offset": 0 }
       ]
