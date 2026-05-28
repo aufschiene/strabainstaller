@@ -3,302 +3,542 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Straba Firmware Installer</title>
+  <title>catch it · Update</title>
   <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a2332 0%, #2a3a4a 50%, #1e2d3d 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 30px;
-      color: #fff;
+    :root{
+      --ink:#1b1b1b; --paper:#efe7d3; --card:#faf6ec; --red:#eb3924; --sbahn:#034ea2;
+      --amber:#f5b301; --board:#161514; --board-txt:#f3e9cf;
+      --land:#e7dcc0; --rail:#d6b24e;
     }
-    
-    .container {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 40px 50px;
-      max-width: 1100px;
-      width: 100%;
-      backdrop-filter: blur(10px);
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Space Grotesk',-apple-system,BlinkMacSystemFont,sans-serif;
+      color:var(--ink); min-height:100vh; padding:30px 20px;
+      display:flex; justify-content:center; align-items:flex-start;
+      background-color:var(--paper);
+      background-image:
+        linear-gradient(rgba(27,27,27,.045) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(27,27,27,.045) 1px,transparent 1px);
+      background-size:24px 24px;
     }
-
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 40px;
-      margin-bottom: 35px;
-      padding-bottom: 30px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    .container{
+      width:100%; max-width:1040px; background:var(--card);
+      border:3px solid var(--ink); border-radius:8px; box-shadow:9px 9px 0 var(--ink);
+      padding:26px 30px 24px;
     }
 
-    .logo {
-      max-width: 200px;
-      flex-shrink: 0;
+    /* persistent ticket header */
+    .ticket-top{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:2px;
+      font-size:.66rem; color:var(--ink); padding-bottom:14px; margin-bottom:22px;
+      border-bottom:3px dashed var(--ink);
     }
+    .ticket-top .tt-r{color:var(--red); font-weight:700}
 
-    .header-text {
-      flex: 1;
-    }
+    h1,h2,h3{font-weight:700; line-height:1.12}
+    .accent{color:var(--red)}
 
-    .header-text h1 {
-      color: #fff;
-      font-size: 1.6em;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
+    /* wizard */
+    .wslide{display:none; animation:fade .35s ease}
+    .wslide.active{display:flex; flex-direction:column; min-height:650px}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-    .announcement {
-      color: #9aa8b8;
-      font-size: 0.9em;
-      line-height: 1.6;
+    /* buttons (boxy retro) */
+    .btn{
+      font-family:'Space Grotesk',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+      font-size:.95rem; border:3px solid var(--ink); border-radius:5px; padding:13px 26px; cursor:pointer;
+      background:var(--card); color:var(--ink); box-shadow:4px 4px 0 var(--ink);
+      transition:transform .07s ease, box-shadow .07s ease;
     }
+    .btn:hover{transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--ink)}
+    .btn:active{transform:translate(4px,4px); box-shadow:0 0 0 var(--ink)}
+    .btn-primary{background:var(--red); color:#fff}
+    .nav-row{display:flex; gap:14px; align-items:center; margin-top:auto; padding-top:26px}
+    .nav-row .spacer{flex:1}
 
-    .announcement .highlight {
-      color: #f0c040;
-      font-weight: 500;
-    }
+    /* line roundels (öffi nerd) */
+    .lines{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:18px 0 6px}
+    .ln{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+        font-weight:700;font-size:.82rem;color:#fff;border:2.5px solid var(--ink); box-shadow:2px 2px 0 var(--ink)}
 
-    .main-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
+    /* splitflap board */
+    .board{
+      background:var(--board); border:3px solid var(--ink); border-radius:6px; box-shadow:6px 6px 0 var(--ink);
+      padding:12px 14px; font-family:'Space Mono',monospace; color:var(--board-txt); perspective:600px;
     }
+    .board-head{display:flex; justify-content:space-between; align-items:center;
+      color:var(--amber); font-size:.64rem; letter-spacing:3px; text-transform:uppercase;
+      padding-bottom:9px; margin-bottom:6px; border-bottom:1px solid #3a352c}
+    .blink{color:#46d17a; animation:blink 1.3s steps(1) infinite}
+    @keyframes blink{50%{opacity:.2}}
+    .frow{display:flex; gap:12px; align-items:center; padding:7px 0; font-size:.92rem; letter-spacing:.5px;
+      border-bottom:1px solid rgba(255,255,255,.05); transform-origin:top center}
+    .frow:last-child{border-bottom:none}
+    .board.run .frow{opacity:0; animation:flip .5s ease forwards}
+    .board.run .frow:nth-child(2){animation-delay:.05s}
+    .board.run .frow:nth-child(3){animation-delay:.13s}
+    .board.run .frow:nth-child(4){animation-delay:.21s}
+    .board.run .frow:nth-child(5){animation-delay:.29s}
+    .board.run .frow:nth-child(6){animation-delay:.37s}
+    .board.run .frow:nth-child(7){animation-delay:.45s}
+    .board.run .frow:nth-child(8){animation-delay:.53s}
+    .board.run .frow:nth-child(9){animation-delay:.61s}
+    @keyframes flip{0%{opacity:0;transform:rotateX(-92deg)}55%{opacity:1}100%{opacity:1;transform:rotateX(0)}}
+    .fnum{color:var(--amber); font-weight:700; width:2.4em; flex-shrink:0}
+    .fdest{flex:1; position:relative; background:#201e1b; border-radius:3px; padding:3px 8px}
+    .fdest::after{content:''; position:absolute; left:0; right:0; top:50%; height:1px; background:rgba(0,0,0,.55)}
+    .fstat{font-size:.74rem; color:#7ec8e3; text-align:right; min-width:4.6em; flex-shrink:0}
+    .fstat.ok{color:#46d17a}
 
-    .left-column {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
+    /* ---- slide 1: welcome ---- */
+    .welcome{text-align:center; padding:10px 0 2px}
+    .welcome img.logo{max-width:260px; width:70%; display:block; margin:6px auto 4px}
+    .welcome h1{font-size:2.15em; margin:14px 0 14px}
+    .welcome p{color:#5b5446; font-size:1.04em; line-height:1.6; max-width:520px; margin:0 auto 22px}
+    .welcome .board{max-width:440px; margin:0 auto}
 
-    .install-section {
-      text-align: center;
-      padding: 30px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 16px;
-      margin-bottom: 25px;
-    }
+    /* ---- slide 2: s-bahn ---- */
+    .sb-banner{position:relative; border:3px solid var(--ink); border-radius:6px; box-shadow:6px 6px 0 var(--ink); overflow:hidden; background:#fff}
+    .sb-photo{display:block; width:100%; height:auto}
+    .sb-logo{position:absolute; left:22px; bottom:22px; width:142px; height:142px; border-radius:50%; border:3px solid var(--ink); box-shadow:4px 4px 0 rgba(0,0,0,.45)}
+    .sb-bannercap{position:absolute; top:0; left:0; right:0; display:flex; justify-content:space-between;
+      font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:1px; font-size:.64rem; color:#fff;
+      padding:9px 13px; background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,0))}
+    .sb-bannercap .sbblue{color:#9ec5ff; font-weight:700}
+    .sb-body{text-align:center; max-width:620px; margin:24px auto 0}
+    .sb-kicker{font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:2px; font-size:.68rem; color:var(--sbahn); margin-bottom:8px}
+    .sb-body h2{font-size:1.9em; margin-bottom:12px}
+    .sb-body .stext{color:#5b5446; font-size:1.04em; line-height:1.6}
 
-    .install-button {
-      background: linear-gradient(135deg, #f0c040 0%, #ffd966 100%);
-      color: #1a1a2e;
-      border: none;
-      padding: 16px 45px;
-      font-size: 1.1em;
-      font-weight: 600;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(240, 192, 64, 0.25);
-    }
-    
-    .install-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(240, 192, 64, 0.35);
-    }
+    /* ---- slide 3: europa ---- */
+    .slide-head{text-align:center; margin-bottom:22px}
+    .slide-head h2{font-size:1.8em; margin-bottom:6px}
+    .slide-head .sub{font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:2px; font-size:.7rem; color:#5b5446}
+    .europa{display:grid; grid-template-columns:1fr 1fr; gap:34px; align-items:center}
+    .map-link{display:block; text-decoration:none; color:inherit; cursor:pointer}
+    .coverage-map-wrap{max-width:400px; margin:0 auto; position:relative}
+    .coverage-map{width:100%; height:auto; display:block}
+    .map-open{position:absolute; top:8px; right:8px; background:var(--red); color:#fff; border:2px solid var(--ink); box-shadow:2px 2px 0 var(--ink);
+      font-family:'Space Mono',monospace; font-size:.58rem; text-transform:uppercase; letter-spacing:1px; padding:4px 8px}
+    .map-link:hover .map-open{transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--ink)}
+    .coverage-countries path{fill:var(--land); stroke:var(--ink); stroke-width:0.45}
+    .coverage-countries path[data-rail="1"]{fill:var(--rail)}
+    .coverage-regions path{fill:var(--rail); stroke:var(--ink); stroke-width:0.3}
+    .coverage-countries path[data-cc="LI"]{fill:var(--rail)}
+    .cov-marker circle{fill:var(--red); stroke:var(--ink); stroke-width:0.6; opacity:0;
+      transform-box:fill-box; transform-origin:center; transform:scale(0)}
+    .cov-marker.show circle{animation:pop .45s cubic-bezier(.34,1.56,.64,1) forwards}
+    @keyframes pop{0%{opacity:0;transform:scale(0)}100%{opacity:1;transform:scale(1)}}
+    .cov-ring{fill:none; stroke:var(--red); stroke-width:0.9; opacity:0; transform-box:fill-box; transform-origin:center}
+    .cov-ring.show{animation:ring 1.9s ease-out infinite}
+    @keyframes ring{0%{opacity:.8;transform:scale(.4)}100%{opacity:0;transform:scale(3.2)}}
+    .map-cap{margin-top:10px; font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:1px; font-size:.6rem; color:#5b5446;
+      display:flex; gap:16px; justify-content:center; flex-wrap:wrap}
+    .map-cap span{display:inline-flex; align-items:center; gap:6px}
+    .sw{width:12px; height:12px; border:2px solid var(--ink); display:inline-block; flex-shrink:0}
+    .sw-rail{background:var(--rail)}
+    .sw-city{background:var(--red); border-radius:50%}
+    .desc{background:#fff; border:3px solid var(--ink); border-radius:6px; box-shadow:6px 6px 0 var(--ink); padding:22px 24px}
+    .desc h3{font-size:1.18em; margin-bottom:5px}
+    .desc .lead{font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:2px; font-size:.62rem; color:#5b5446; margin-bottom:16px}
+    .desc .point{display:flex; gap:14px; align-items:flex-start; padding:13px 0; border-top:2px dashed #ddd1b3}
+    .desc .point:first-of-type{border-top:none; padding-top:2px}
+    .desc .pmark{width:24px; height:24px; border-radius:50%; border:2.5px solid var(--ink); box-shadow:2px 2px 0 var(--ink); flex-shrink:0; margin-top:2px}
+    .desc .pmark.area{border-radius:5px}
+    .desc .ptext h4{font-size:1.02em; margin-bottom:3px}
+    .desc .ptext p{color:#5b5446; font-size:.9em; line-height:1.5}
+    .desc .foot{margin-top:14px; padding-top:12px; border-top:3px dashed var(--ink); font-family:'Space Mono',monospace; font-size:.72rem; line-height:1.45; color:#5b5446}
+    a.foot{display:block; text-decoration:none}
+    a.foot:hover{color:var(--red)}
+    a.foot .lnk{color:var(--red); text-decoration:underline; text-underline-offset:2px}
+    .browserwarn{display:none; margin-top:18px; font-family:'Space Mono',monospace; font-size:.78rem; line-height:1.5;
+      background:#fff4d6; border:3px solid var(--ink); border-left-width:8px; border-left-color:var(--amber);
+      border-radius:5px; padding:12px 14px; color:var(--ink)}
 
-    .warning {
-      padding: 15px 18px;
-      background: rgba(240, 180, 64, 0.1);
-      border: 1px solid rgba(240, 180, 64, 0.2);
-      border-radius: 10px;
-      font-size: 0.85em;
-      color: #c9b896;
-    }
+    /* ---- slide 4: installer ---- */
+    .ticket{position:relative; background:#fff; border:3px solid var(--ink); border-radius:6px; box-shadow:6px 6px 0 var(--ink);
+      padding:18px 22px; margin-bottom:26px; display:flex; gap:18px; align-items:center}
+    .ticket::before,.ticket::after{content:''; position:absolute; width:20px; height:20px; background:var(--card);
+      border:3px solid var(--ink); border-radius:50%; top:50%; transform:translateY(-50%)}
+    .ticket::before{left:-13px} .ticket::after{right:-13px}
+    .ticket .big{font-size:2em; flex-shrink:0}
+    .ticket h3{color:var(--red); font-size:1.06em; margin-bottom:4px}
+    .ticket p{color:#5b5446; font-size:.9em; line-height:1.5}
+    .ticket p b{color:var(--ink)}
+    .install-wrap{display:grid; grid-template-columns:1fr 1.05fr; gap:30px; align-items:start}
+    .install-col{display:flex; flex-direction:column; gap:16px}
+    .install-pad{border:3px solid var(--ink); border-radius:6px; box-shadow:5px 5px 0 var(--ink); background:#fff; padding:24px; text-align:center}
+    .install-button{font-family:'Space Grotesk',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+      background:var(--red); color:#fff; border:3px solid var(--ink); border-radius:5px; box-shadow:4px 4px 0 var(--ink);
+      padding:15px 30px; font-size:1rem; cursor:pointer; transition:transform .07s,box-shadow .07s}
+    .install-button:hover{transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--ink)}
+    .install-button:active{transform:translate(4px,4px); box-shadow:0 0 0 var(--ink)}
+    .tips{font-family:'Space Mono',monospace; font-size:.76rem; line-height:1.55; background:#fff4d6;
+      border:3px solid var(--ink); border-radius:5px; padding:12px 14px}
+    .tips ul{margin-top:6px; padding-left:18px}
+    esp-web-install-button{display:block}
+    .popnote{font-family:'Space Mono',monospace; font-size:.78rem; line-height:1.5; background:#eaf2ff;
+      border:3px solid var(--ink); border-left-width:8px; border-left-color:var(--sbahn); border-radius:5px; padding:12px 14px}
 
-    .warning ul {
-      margin-top: 8px;
-      padding-left: 18px;
-      line-height: 1.7;
-    }
+    /* ---- install-wizard (phase B) ---- */
+    .photo-frame{background:#fff; border:3px solid var(--ink); border-radius:6px; box-shadow:6px 6px 0 var(--ink); padding:7px}
+    .photo-frame .sb-photo{border-radius:3px}
+    .chrome-block{text-align:center; padding:20px 0 6px; max-width:520px; margin:0 auto}
+    .chrome-block .cb-icon{font-size:3em; line-height:1; margin-bottom:12px}
+    .chrome-block h2{font-size:1.9em; margin-bottom:14px}
+    .chrome-block p{color:#5b5446; line-height:1.6; margin-bottom:12px}
+    .chrome-block .cb-hint{font-family:'Space Mono',monospace; font-size:.78rem; background:#fff4d6; border:3px solid var(--ink); border-radius:5px; padding:12px 14px; color:var(--ink)}
+    .usb-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:30px; align-items:center}
+    .usb-text h3{color:var(--ink)}
+    .desc .pnum{width:26px; height:26px; border-radius:50%; border:2.5px solid var(--ink); box-shadow:2px 2px 0 var(--ink);
+      background:var(--card); flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center;
+      font-family:'Space Mono',monospace; font-weight:700; font-size:.8rem}
 
-    .right-column h3 {
-      color: #f0c040;
-      margin-bottom: 20px;
-      font-size: 1em;
-      font-weight: 600;
-    }
+    /* dots */
+    .dots{display:flex; justify-content:center; gap:9px; margin-top:28px}
+    .dot{width:11px; height:11px; border:2.5px solid var(--ink); background:var(--card); transition:all .25s}
+    .dot.on{background:var(--red); width:26px}
 
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+    .footer{margin-top:22px; padding-top:16px; border-top:3px dashed var(--ink); display:flex; justify-content:space-between;
+      font-family:'Space Mono',monospace; text-transform:uppercase; letter-spacing:1px; font-size:.64rem; color:#5b5446}
 
-    .step {
-      display: flex;
-      gap: 15px;
-      align-items: flex-start;
-    }
-
-    .step-number {
-      background: rgba(240, 192, 64, 0.15);
-      color: #f0c040;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.85em;
-      flex-shrink: 0;
-    }
-
-    .step-content {
-      flex: 1;
-    }
-
-    .step-content p {
-      color: #b8c4d0;
-      font-size: 0.9em;
-      line-height: 1.5;
-      margin-bottom: 10px;
-    }
-
-    .step-content .note {
-      color: #8a96a3;
-      font-size: 0.8em;
-      font-style: italic;
-    }
-
-    .step-screenshot {
-      margin-top: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      max-width: 200px;
-      opacity: 0.9;
-    }
-
-    .footer {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.8em;
-      color: #6b7785;
-    }
-
-    esp-web-install-button {
-      display: block;
-    }
-
-    @media (max-width: 900px) {
-      .header {
-        flex-direction: column;
-        text-align: center;
-      }
-      .main-content {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width:860px){
+      .container{padding:22px 18px; box-shadow:6px 6px 0 var(--ink)}
+      .europa,.install-wrap,.usb-grid{grid-template-columns:1fr; gap:22px}
+      .wslide.active{min-height:auto}
+      .sb-logo{width:98px; height:98px; left:14px; bottom:14px}
+      .welcome h1{font-size:1.7em}
+      .ticket-top{font-size:.58rem; letter-spacing:1px}
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <img src="logo.png" alt="Straba Logo" class="logo">
-      <div class="header-text">
-        <h1>Straba Installer <span style="color: #f0c040; font-size: 0.7em;">v1.1</span></h1>
-        <p class="announcement">
-          <span class="highlight">Neu:</span> Software-Version 1.1 mit zahlreichen Verbesserungen und neuen Features. 
-          Aktualisiert euer Gerät und profitiert direkt davon. Viel Freude mit dem Update! — <span class="highlight">Euer Straba-Team</span>
-        </p>
-      </div>
+    <div class="ticket-top">
+      <span>catch it &middot; Firmware-Update</span>
+      <span class="tt-r">Dein Straba wird zum catch it!</span>
     </div>
 
-    <div class="main-content">
-      <div class="left-column">
-        <div class="install-section">
-          <esp-web-install-button manifest="manifest.json">
-            <button class="install-button" slot="activate">
-              Update installieren
-            </button>
-            <span slot="unsupported">
-              <div class="warning">
-                ⚠️ Dein Browser unterstützt Web Serial nicht. Bitte verwende <strong>Chrome</strong> oder <strong>Edge</strong>.
-              </div>
-            </span>
-          </esp-web-install-button>
+    <!-- ===== SLIDE 1: WILLKOMMEN ===== -->
+    <section class="wslide active" id="w1">
+      <div class="welcome">
+        <img src="logo.png" alt="catch it" class="logo">
+        <div class="lines">
+          <span class="ln" style="background:#e20a16">U1</span>
+          <span class="ln" style="background:#a862a4">U2</span>
+          <span class="ln" style="background:#ee7d11">U3</span>
+          <span class="ln" style="background:#00964e">U4</span>
+          <span class="ln" style="background:#9d6930">U6</span>
+          <span class="ln" style="background:#034ea2">S</span>
         </div>
+        <h1>Willkommen beim<br>gro&szlig;en <span class="accent">Update</span></h1>
+        <p>Dein Straba bekommt das gr&ouml;&szlig;te Update seiner Geschichte. In wenigen Minuten ist dein Ger&auml;t am neuesten Stand.</p>
+        <div class="board" data-board>
+          <div class="board-head"><span>&#9210; Abfahrt / Departures</span><span class="blink">&#9679; live</span></div>
+          <div class="frow"><span class="fnum">00</span><span class="fdest">SOFTWARE-UPDATE 2.0</span><span class="fstat ok">bereit</span></div>
+          <div class="frow"><span class="fnum">02</span><span class="fdest">WIEN &#9656; GANZ EUROPA</span><span class="fstat">neu</span></div>
+          <div class="frow"><span class="fnum">05</span><span class="fdest">ALLE S-BAHNEN</span><span class="fstat">neu</span></div>
+        </div>
+      </div>
+      <div class="nav-row" style="justify-content:center">
+        <button class="btn btn-primary" onclick="go(2)">Los geht's &rarr;</button>
+      </div>
+    </section>
 
-        <div class="warning">
-          <strong>💡 Tipps bei Problemen:</strong>
-          <ul>
-            <li>USB-Kabel einmal aus- und wieder einstecken</li>
-            <li><strong>USB-A auf USB-C Kabel</strong> verwenden</li>
-          </ul>
+    <!-- ===== SLIDE 2: S-BAHN ===== -->
+    <section class="wslide" id="w2">
+      <div class="sb-banner">
+        <img class="sb-photo" src="s-bahnbild.jpg" alt="&Ouml;BB Cityjet Wiener S-Bahn">
+        <div class="sb-bannercap"><span>&Ouml;BB Cityjet &middot; Doppelstock</span><span class="sbblue">Wiener S-Bahn</span></div>
+        <img class="sb-logo" src="s-bahn_logo.png" alt="S-Bahn">
+      </div>
+      <div class="sb-body">
+        <div class="sb-kicker">Schnellbahn / S-Bahn</div>
+        <h2>Jetzt mit allen <span style="color:var(--sbahn)">S-Bahnen</span></h2>
+        <p class="stext">Dein Straba zeigt ab sofort auch alle S-Bahn-Linien an &ndash; vom Wiener Schnellbahn-Stammstrecken-Takt bis zur Regionalbahn. Aber das ist erst der Anfang.</p>
+      </div>
+      <div class="nav-row">
+        <button class="btn" onclick="go(1)">&larr; Zur&uuml;ck</button>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" onclick="go(3)">Weiter &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ===== SLIDE 3: GANZ EUROPA ===== -->
+    <section class="wslide" id="w3">
+      <div class="slide-head">
+        <h2>Ganz <span class="accent">Europa</span></h2>
+        <div class="sub">Von Wien auf &uuml;ber 20 St&auml;dte &mdash; und st&auml;ndig mehr</div>
+      </div>
+      <div class="europa">
+        <div class="map-box">
+          <a class="map-link" href="https://catch.it/cities" target="_blank" rel="noopener" title="Ganze interaktive Karte auf catch.it/cities">
+            <div class="coverage-map-wrap">
+              <svg class="coverage-map" id="coverageMap" viewBox="0 0 276.4 320" role="img" aria-label="Europe coverage map" xmlns="http://www.w3.org/2000/svg">
+        <g class="coverage-countries"><path d="M1219.5,-51.0 1220.7,-47.8 1219.5,-51.0ZM386.3,196.0 383.4,201.9 377.2,203.6 370.8,213.9 376.6,223.4 376.0,230.1 383.0,241.9 383.0,241.9 379.2,245.9 378.1,248.5 375.2,247.8 370.8,241.7 369.0,241.4 365.0,239.1 363.0,235.0 357.0,232.9 353.1,234.5 352.0,232.6 343.2,227.8 333.7,226.2 328.3,224.5 327.5,225.7 319.3,217.2 312.0,213.4 306.5,207.6 311.1,206.0 316.5,197.6 312.9,193.6 322.3,189.6 322.2,187.4 316.4,189.0 316.6,184.5 319.9,181.7 326.1,181.0 327.2,177.7 325.7,172.2 328.3,166.9 328.3,164.0 318.8,160.7 315.0,160.8 311.1,156.2 306.1,157.7 298.0,154.2 298.1,152.3 295.8,147.9 290.7,147.4 290.2,144.3 291.8,142.3 287.7,136.6 281.0,137.6 279.0,137.1 277.4,139.4 275.0,139.0 275.0,139.0 273.4,132.6 271.9,129.3 273.2,128.3 278.4,128.7 280.9,126.5 279.0,123.8 274.7,122.1 275.1,120.3 272.4,118.4 268.4,111.9 269.8,109.2 269.2,104.5 262.9,102.1 259.5,103.3 258.6,100.8 251.8,98.3 249.8,92.4 249.2,87.6 246.1,85.3 248.9,82.1 247.0,72.8 251.5,67.0 250.6,65.2 250.6,65.2 257.9,59.7 251.1,55.0 251.1,55.0 264.9,42.2 270.9,36.4 273.3,31.3 263.8,24.5 266.4,18.0 260.6,10.5 264.9,1.9 257.5,-9.4 263.4,-17.0 253.6,-23.6 254.5,-30.6 259.7,-31.6 270.6,-35.6 270.6,-35.6 277.3,-39.1 287.8,-33.0 305.4,-30.6 329.7,-19.3 334.6,-14.6 335.1,-7.9 327.9,-2.7 317.4,0.0 288.7,-7.6 284.0,-6.3 294.5,1.0 294.9,5.6 295.3,15.9 303.6,18.9 308.6,21.5 309.5,16.7 305.6,12.4 309.7,8.6 325.2,14.8 330.6,12.4 326.3,5.0 341.3,-4.8 347.2,-4.2 353.2,-0.7 357.0,-7.6 351.6,-13.5 354.7,-19.5 350.0,-25.7 368.0,-22.5 371.7,-16.9 363.5,-15.7 363.6,-10.1 368.6,-6.7 378.6,-8.8 380.1,-15.2 393.6,-20.0 416.0,-28.6 420.8,-28.1 414.5,-22.0 422.5,-21.0 427.1,-24.4 439.1,-24.7 448.7,-28.8 456.0,-22.8 463.3,-29.4 456.6,-35.2 459.9,-38.5 478.9,-35.5 487.8,-32.3 511.1,-20.9 515.4,-26.2 508.9,-31.4 508.7,-33.6 500.9,-34.5 503.0,-39.3 499.6,-47.1 499.4,-50.3 511.3,-59.3 515.5,-68.4 520.3,-70.4 537.3,-67.8 538.6,-62.2 532.5,-54.1 536.5,-50.9 538.6,-43.9 537.1,-30.2 544.2,-24.1 541.5,-17.4 528.9,-3.2 536.2,-1.7 538.8,-5.3 545.9,-7.9 547.6,-12.8 553.1,-17.6 549.4,-23.3 552.4,-29.9 545.4,-30.7 543.8,-36.3 548.9,-46.3 540.6,-54.5 552.1,-61.2 550.6,-68.3 553.8,-68.5 557.2,-63.0 554.7,-53.4 561.5,-51.5 558.6,-58.7 569.4,-62.7 582.7,-63.2 594.6,-57.5 588.9,-65.8 588.2,-76.5 599.4,-78.5 614.9,-78.1 628.8,-79.4 623.6,-84.6 631.0,-91.2 638.4,-91.4 650.9,-96.4 667.9,-97.7 670.0,-100.5 686.9,-101.4 692.1,-99.2 706.6,-104.5 718.4,-104.3 720.1,-108.6 726.3,-112.9 741.5,-117.0 752.5,-113.7 743.7,-111.3 758.3,-109.7 760.0,-104.8 765.9,-107.2 784.7,-107.1 799.2,-102.2 804.3,-98.5 802.7,-93.3 795.6,-90.3 778.7,-84.8 773.9,-81.8 781.9,-80.4 791.4,-77.9 797.2,-79.8 800.5,-73.4 803.3,-75.9 813.6,-77.5 834.2,-75.9 835.8,-71.2 862.6,-69.7 863.0,-77.4 876.6,-75.6 886.9,-75.7 897.3,-70.4 900.2,-64.0 896.4,-59.8 904.5,-51.9 914.6,-47.9 920.8,-58.4 931.1,-53.9 942.1,-56.6 954.5,-53.5 959.3,-56.3 969.8,-54.9 965.1,-64.2 973.6,-68.5 1031.7,-62.0 1037.1,-56.1 1054.0,-48.4 1079.9,-50.3 1092.7,-48.7 1098.1,-44.5 1097.3,-37.2 1105.2,-34.4 1113.8,-36.4 1125.2,-36.7 1137.4,-34.7 1149.5,-35.8 1160.7,-26.9 1168.7,-30.1 1163.5,-36.5 1166.4,-41.0 1186.9,-38.2 1200.2,-38.8 1218.7,-34.0 1227.7,10.3 1219.4,14.7 1211.1,13.9 1216.9,19.2 1220.7,27.5 1223.7,30.2 1224.4,34.3 1222.8,37.0 1210.8,34.8 1192.8,42.3 1187.1,43.5 1177.3,50.5 1167.9,56.6 1165.6,61.2 1156.4,54.3 1139.6,62.1 1136.7,58.4 1130.5,62.7 1121.9,61.3 1119.8,67.9 1112.1,77.6 1112.4,81.6 1119.7,83.8 1118.8,98.4 1112.9,98.8 1110.1,107.1 1112.8,111.4 1101.5,116.6 1099.3,128.0 1089.7,130.4 1087.8,140.6 1078.5,149.9 1076.2,143.0 1073.4,128.4 1069.8,106.2 1072.9,92.3 1078.3,86.4 1078.7,81.7 1088.7,79.4 1100.1,66.9 1111.2,56.6 1122.8,48.6 1127.9,34.5 1120.1,35.3 1116.3,43.6 1099.9,54.6 1094.7,42.3 1078.1,45.7 1062.0,62.4 1067.3,68.6 1053.0,71.2 1043.0,72.2 1043.5,65.0 1033.5,63.4 1025.5,68.4 1005.9,66.6 984.7,69.6 963.9,89.1 939.3,112.7 949.4,114.0 952.6,120.2 958.8,122.4 962.9,117.5 970.0,118.1 979.3,129.1 979.5,137.6 974.4,147.6 973.9,159.5 971.0,175.5 961.3,190.0 959.2,196.9 950.4,208.6 941.8,220.1 937.6,226.0 929.1,231.9 925.0,232.0 921.0,227.2 912.3,234.5 911.3,237.8 911.3,237.8 911.3,237.8 911.3,237.8 910.4,236.0 910.4,236.0 910.4,231.0 913.7,230.7 914.6,218.9 912.9,210.3 918.4,206.8 926.2,208.6 930.6,198.8 932.8,187.9 935.3,184.2 938.6,175.2 928.0,178.2 922.4,182.1 912.7,182.1 910.1,172.7 902.5,165.6 891.3,162.4 888.9,152.6 886.7,146.5 884.2,142.2 880.3,132.1 874.6,128.4 865.0,125.4 856.5,125.7 848.5,127.5 843.2,132.5 846.7,134.8 846.8,140.4 843.2,143.6 837.4,154.2 837.5,158.6 828.4,164.9 820.7,161.1 813.0,161.9 809.7,158.6 805.8,157.5 796.4,164.6 787.9,166.2 782.0,168.7 773.9,167.1 768.0,167.2 764.1,162.1 757.8,157.3 751.3,155.9 743.2,157.2 737.1,159.1 728.0,154.9 726.8,147.4 719.2,144.8 713.4,143.7 706.2,139.5 699.5,149.9 702.1,155.8 695.9,162.7 686.6,160.2 680.2,159.9 675.9,155.2 669.2,155.0 663.6,152.0 653.8,156.7 641.5,165.3 634.8,167.0 632.2,167.9 628.8,161.7 620.6,163.1 617.8,158.8 613.3,156.9 610.2,151.1 606.7,149.3 597.4,151.9 588.6,146.1 585.2,151.4 570.8,126.0 562.6,118.2 565.0,115.1 548.8,124.5 542.7,125.1 543.2,119.6 535.0,116.2 528.2,118.7 526.2,108.3 514.7,106.1 508.9,110.3 492.8,114.0 489.7,116.5 465.6,119.9 462.7,123.4 467.3,130.2 461.1,132.8 462.3,135.5 456.2,140.4 466.6,147.3 465.0,152.0 455.9,151.6 454.1,154.5 445.9,149.4 435.7,149.6 428.8,153.8 421.2,149.7 407.1,142.8 397.0,143.1 383.8,153.9 383.0,161.3 376.3,155.5 371.2,166.4 373.1,168.5 369.4,176.1 374.8,182.8 379.6,182.6 383.7,189.2 383.1,194.4 386.3,196.0ZM673.5,-150.2 687.4,-152.5 699.9,-147.5 714.7,-137.8 713.1,-128.8 699.1,-127.6 681.2,-130.4 670.5,-134.3 665.6,-141.4 656.8,-143.4 673.5,-150.2ZM731.7,-132.8 748.0,-127.1 746.1,-123.1 709.9,-119.2 721.6,-132.3 726.9,-133.5 731.7,-132.8ZM963.1,-101.4 980.1,-100.9 1003.3,-95.6 998.2,-88.2 974.6,-88.5 963.9,-86.1 951.2,-92.6 954.6,-99.5 963.1,-101.4ZM1023.5,-93.5 1039.6,-90.8 1032.2,-86.9 1021.9,-87.8 1009.9,-91.7 1011.5,-95.0 1023.5,-93.5ZM969.7,-73.7 975.8,-77.7 983.9,-78.6 993.0,-74.8 993.8,-72.1 984.0,-72.1 970.9,-73.2 969.7,-73.7ZM359.0,-145.9 371.5,-147.7 381.3,-147.8 382.6,-145.1 386.3,-147.5 392.4,-149.2 401.9,-147.0 399.4,-145.5 390.8,-144.2 385.0,-143.4 384.1,-141.8 376.6,-140.1 369.6,-142.5 373.3,-145.6 359.0,-145.9ZM216.8,116.7 205.0,116.9 197.1,115.7 198.5,111.3 207.4,108.1 214.1,109.8 217.0,111.4 216.3,114.2 216.8,116.7ZM414.7,-77.5 430.0,-86.3 428.3,-90.8 442.7,-96.1 463.9,-102.5 485.3,-104.4 496.3,-108.1 508.8,-109.4 513.3,-105.4 509.0,-102.3 486.2,-97.4 466.6,-92.6 446.6,-83.1 437.0,-73.3 426.9,-63.7 428.2,-55.4 440.5,-47.2 436.7,-46.3 415.7,-47.6 414.0,-52.1 402.4,-54.7 401.5,-60.1 408.0,-62.3 407.8,-67.7 420.6,-76.3 414.7,-77.5ZM989.3,123.0 991.6,132.6 991.4,142.4 994.1,152.5 1000.5,170.2 991.0,166.9 987.1,181.4 993.3,191.6 993.1,198.6 988.3,192.6 984.1,200.3 982.9,191.9 983.6,182.2 982.9,171.4 984.3,163.8 984.6,150.5 980.9,140.6 981.4,127.0 987.4,122.4 984.8,117.7 987.7,116.3 989.3,123.0ZM-1053.7,-12.1 -1054.3,-5.8 -1049.9,-3.4 -1051.4,-10.6 -1034.0,-9.1 -1021.4,0.2 -1027.8,4.6 -1038.3,5.6 -1038.5,15.4 -1041.0,17.5 -1047.0,17.2 -1051.9,13.7 -1060.5,10.8 -1061.9,6.4 -1068.5,4.8 -1075.8,6.1 -1079.3,2.6 -1077.9,-1.1 -1085.6,1.3 -1082.7,6.0 -1070.6,-22.0 -1053.7,-12.1ZM-1077.9,-48.9 -1085.5,-55.6 -1080.0,-55.6 -1070.7,-52.7 -1071.3,-51.3 -1077.9,-48.9ZM285.6,200.3 287.3,197.8 291.9,199.9 294.0,200.3 294.8,202.3 295.8,202.6 295.8,203.5 299.0,205.9 305.5,205.3 304.3,208.9 297.2,210.6 288.5,216.4 284.9,214.4 286.3,209.7 279.3,206.7 280.5,204.8 286.6,201.5 285.6,200.3Z" data-cc="RU" data-rail="0"/>
+<path d="M168.0,-136.7 170.5,-140.2 179.9,-140.5 188.0,-137.0 209.2,-129.6 193.0,-125.6 189.4,-118.3 183.8,-116.4 180.7,-108.1 173.0,-107.7 159.2,-113.8 165.0,-117.4 155.4,-120.2 142.8,-128.7 137.8,-136.5 155.4,-140.1 158.9,-136.6 168.0,-136.7ZM270.6,-35.6 259.7,-31.6 254.5,-30.6 257.2,-37.7 249.0,-41.6 239.0,-38.3 235.8,-30.9 229.7,-26.5 222.8,-28.9 214.4,-28.4 207.3,-33.7 203.4,-31.1 199.4,-30.7 198.5,-24.1 186.4,-25.7 184.7,-20.1 178.5,-20.1 174.3,-13.0 167.8,-1.9 157.8,12.1 160.2,15.5 157.9,19.5 151.6,19.3 147.4,28.7 147.8,42.0 151.9,47.1 149.8,58.8 144.4,65.7 141.6,71.4 137.3,65.3 124.6,76.9 116.0,79.2 107.1,74.1 104.8,63.4 102.8,40.3 108.7,33.9 125.7,25.5 138.4,15.1 150.1,1.2 165.6,-18.1 176.4,-25.6 194.0,-38.2 208.1,-42.6 218.7,-42.0 228.5,-50.3 240.2,-49.9 251.8,-51.9 271.9,-44.5 263.6,-41.9 270.6,-35.6ZM246.9,-140.6 237.3,-135.2 218.7,-134.0 199.7,-135.7 198.6,-138.4 189.4,-138.6 182.3,-143.2 202.2,-146.0 211.5,-143.6 218.0,-146.6 234.3,-144.1 246.9,-140.6ZM229.6,-118.5 215.3,-114.4 203.9,-116.8 208.4,-119.4 204.5,-122.5 217.8,-124.5 220.4,-120.8 229.6,-118.5Z" data-cc="NO" data-rail="1"/>
+<path d="M-261.3,618.4 -265.1,627.6 -267.1,635.0 -269.6,638.8 -272.7,639.5 -273.5,636.7 -275.0,636.2 -277.0,638.9 -279.8,636.9 -278.1,632.7 -277.6,628.1 -276.4,623.8 -279.0,617.9 -279.5,611.0 -276.1,602.4 -273.9,603.5 -269.2,605.9 -262.4,614.3 -261.3,618.4ZM110.5,165.4 113.5,168.0 122.8,169.8 119.5,176.7 118.7,183.8 116.9,185.5 114.0,184.6 114.2,187.1 109.5,192.7 109.4,197.3 112.5,195.7 114.7,200.1 114.4,202.9 116.3,206.7 114.1,209.7 115.8,217.5 119.2,218.7 118.5,223.1 112.7,228.7 100.0,226.0 90.6,229.2 89.9,235.3 82.4,236.6 75.2,232.0 72.9,234.2 61.0,229.7 58.5,225.8 61.8,219.8 63.0,199.9 56.4,189.4 51.7,184.3 41.8,180.5 41.2,173.2 49.5,171.0 60.3,173.6 58.3,162.2 64.3,166.5 79.3,158.7 81.2,150.5 86.9,148.5 87.8,152.0 90.8,152.2 93.8,156.2 98.3,160.9 101.6,160.1 107.2,164.7 108.6,165.6 110.5,165.4ZM126.9,233.7 131.1,229.9 132.2,238.5 130.0,246.2 127.1,244.2 125.6,237.4 126.9,233.7Z" data-cc="FR" data-rail="1"/>
+<path d="M300.3,332.9 299.2,336.1 296.9,334.7 295.5,341.3 297.1,342.5 295.5,343.8 295.2,346.5 298.2,345.1 298.4,349.0 295.2,365.0 294.5,362.4 291.0,347.8 291.0,347.8 291.0,347.8 292.8,344.5 292.4,343.9 294.1,339.3 295.4,331.7 296.3,329.2 296.5,329.1 298.6,329.1 299.2,327.4 301.0,327.2 301.1,331.3 300.2,332.8 300.3,332.9Z" data-cc="IL" data-rail="0"/>
+<path d="M301.0,327.2 299.2,327.4 298.6,329.1 296.5,329.1 298.8,320.9 302.0,313.9 302.1,313.6 305.0,314.1 306.0,318.0 302.5,321.8 301.0,327.2Z" data-cc="LB" data-rail="0"/>
+<path d="M298.2,345.1 295.2,346.5 295.5,343.8 297.1,342.5 295.5,341.3 296.9,334.7 299.2,336.1 299.2,342.2 298.2,345.1Z" data-cc="PS" data-rail="0"/>
+<path d="M131.7,356.9 128.9,339.0 125.0,334.9 124.9,332.5 119.6,326.6 119.1,319.0 123.0,313.4 124.5,305.2 123.5,295.7 124.8,290.5 131.8,286.5 136.3,287.7 136.1,292.8 141.6,289.1 142.1,291.0 138.8,295.9 138.8,300.5 141.0,303.0 140.2,311.7 135.9,316.7 137.2,322.1 140.5,322.3 142.1,327.1 144.6,328.6 144.2,336.3 141.1,339.2 139.1,342.4 134.7,346.2 135.3,350.4 134.8,354.6 131.7,356.9Z" data-cc="TN" data-rail="0"/>
+<path d="M14.9,386.0 15.0,384.1 15.0,383.4 15.0,371.6 25.3,364.2 31.7,362.7 37.0,360.0 39.5,355.0 47.0,351.0 47.3,343.6 51.0,342.8 53.9,339.1 62.3,337.4 63.5,333.5 61.8,331.4 59.6,320.8 59.2,314.7 56.8,308.3 62.9,302.9 69.9,301.1 73.9,297.0 80.1,293.9 91.0,292.2 101.7,291.3 104.9,292.8 111.0,288.9 117.8,288.8 120.4,291.1 124.8,290.5 123.5,295.7 124.5,305.2 123.0,313.4 119.1,319.0 119.6,326.6 124.9,332.5 125.0,334.9 128.9,339.0 131.7,356.9 133.7,365.8 134.1,370.4 133.0,378.6 133.4,383.1 132.6,388.6 133.2,394.9 130.6,399.1 134.4,406.3 134.7,410.6 136.9,416.2 139.9,414.4 145.0,419.0 147.8,425.3 125.8,444.3 107.2,464.0 98.1,468.4 91.0,469.4 90.9,463.1 88.0,461.4 84.0,458.6 82.4,453.9 60.7,432.1 39.1,410.3 14.9,386.0Z" data-cc="DZ" data-rail="0"/>
+<path d="M299.2,336.1 300.3,332.9 307.5,336.9 320.1,326.2 322.7,338.4 321.4,339.9 308.6,344.9 315.0,354.9 312.8,356.6 311.8,360.0 306.9,361.3 305.3,364.9 302.6,368.0 295.4,366.4 295.2,365.0 298.4,349.0 298.2,345.1 299.2,342.2 299.2,336.1Z" data-cc="JO" data-rail="0"/>
+<path d="M300.3,332.9 300.2,332.8 301.1,331.3 301.0,327.2 302.5,321.8 306.0,318.0 305.0,314.1 302.1,313.6 301.5,305.9 303.1,301.8 304.8,299.6 306.5,297.4 306.9,291.8 309.0,293.8 316.0,291.0 319.5,292.9 324.8,292.8 332.1,289.1 335.6,289.3 342.9,287.7 339.6,293.9 336.1,296.4 336.7,303.7 334.3,315.8 320.1,326.2 307.5,336.9 300.3,332.9Z" data-cc="SY" data-rail="0"/>
+<path d="M141.6,71.4 144.4,65.7 149.8,58.8 151.9,47.1 147.8,42.0 147.4,28.7 151.6,19.3 157.9,19.5 160.2,15.5 157.8,12.1 167.8,-1.9 174.3,-13.0 178.5,-20.1 184.7,-20.1 186.4,-25.7 198.5,-24.1 199.4,-30.7 203.4,-31.1 212.0,-26.2 222.0,-19.4 222.2,-4.0 224.4,-0.1 213.3,2.8 207.1,9.7 208.1,15.9 197.8,23.9 185.4,32.5 180.7,46.6 185.3,53.6 191.5,59.2 185.6,70.5 178.9,72.8 176.4,89.6 172.8,99.0 165.0,98.0 161.3,105.9 153.9,106.4 151.9,96.9 146.5,85.6 141.6,71.4Z" data-cc="SE" data-rail="1"/>
+<path d="M251.8,98.3 258.6,100.8 259.5,103.3 262.9,102.1 269.2,104.5 269.8,109.2 268.4,111.9 272.4,118.4 275.1,120.3 274.7,122.1 279.0,123.8 280.9,126.5 278.4,128.7 273.2,128.3 271.9,129.3 273.4,132.6 275.0,139.0 275.0,139.0 269.5,139.6 267.5,141.8 267.1,146.8 264.6,145.8 258.8,146.3 257.1,144.0 254.7,145.7 252.2,144.3 247.2,144.1 240.0,141.7 233.5,140.9 228.5,141.1 225.0,143.8 221.9,144.2 221.8,139.8 219.8,135.1 223.7,133.1 223.7,129.1 221.9,125.3 221.7,120.9 227.9,120.9 234.9,117.2 236.3,111.5 241.6,108.3 241.0,103.8 244.9,102.2 251.8,98.3Z" data-cc="BY" data-rail="0"/>
+<path d="M275.0,139.0 277.4,139.4 279.0,137.1 281.0,137.6 287.7,136.6 291.8,142.3 290.2,144.3 290.7,147.4 295.8,147.9 298.1,152.3 298.0,154.2 306.1,157.7 311.1,156.2 315.0,160.8 318.8,160.7 328.3,164.0 328.3,166.9 325.7,172.2 327.2,177.7 326.1,181.0 319.9,181.7 316.6,184.5 316.4,189.0 311.3,189.8 307.0,193.0 301.0,193.5 295.4,197.3 295.8,202.6 294.8,202.3 294.0,200.3 291.9,199.9 287.3,197.8 285.6,200.3 284.7,199.2 274.8,196.7 274.3,192.9 268.4,194.2 266.0,199.7 261.0,207.1 258.1,205.4 255.1,207.0 252.2,205.1 253.8,204.0 254.9,200.6 256.7,197.4 256.2,195.6 257.6,194.8 258.2,196.2 262.0,196.5 263.7,195.8 262.5,194.7 263.0,193.3 260.7,190.7 259.8,186.5 257.4,184.9 257.9,181.5 255.0,178.8 252.4,178.4 247.6,175.3 243.3,176.3 241.8,177.8 239.1,177.8 237.5,180.1 232.7,181.1 230.5,182.6 227.6,180.2 223.4,180.1 219.5,179.0 216.7,181.2 216.2,178.5 212.7,175.8 213.9,171.7 215.7,169.1 217.1,169.7 215.5,165.2 221.3,156.9 224.5,155.8 225.2,152.9 221.9,144.2 225.0,143.8 228.5,141.1 233.5,140.9 240.0,141.7 247.2,144.1 252.2,144.3 254.7,145.7 257.1,144.0 258.8,146.3 264.6,145.8 267.1,146.8 267.5,141.8 269.5,139.6 275.0,139.0Z" data-cc="UA" data-rail="0"/>
+<path d="M221.7,120.9 221.9,125.3 223.7,129.1 223.7,133.1 219.8,135.1 221.8,139.8 221.9,144.2 225.2,152.9 224.5,155.8 221.3,156.9 215.5,165.2 217.1,169.7 215.7,169.1 209.6,165.3 205.0,166.7 201.9,165.7 198.1,167.8 194.9,164.3 192.3,165.6 191.9,165.0 188.9,160.1 184.2,159.5 183.5,156.4 179.1,155.3 178.2,157.8 174.7,155.8 175.1,153.0 170.3,152.2 167.2,148.9 164.6,142.5 165.1,139.1 163.5,133.8 161.2,130.2 163.0,127.5 161.5,122.4 165.9,119.5 175.9,114.9 184.0,111.5 190.4,113.2 190.9,115.6 197.1,115.7 205.0,116.9 216.8,116.7 220.1,117.8 221.7,120.9Z" data-cc="PL" data-rail="1"/>
+<path d="M179.8,178.8 179.4,182.9 175.7,182.9 177.0,185.0 174.9,191.5 173.6,193.2 168.0,193.4 164.8,195.7 159.5,194.9 150.3,192.3 148.8,188.8 142.5,190.6 141.7,192.5 137.8,191.1 134.6,190.8 131.6,189.0 132.6,186.5 132.4,184.7 134.3,184.2 137.6,187.0 138.5,184.3 144.2,184.8 148.7,183.0 151.8,183.3 153.8,185.3 154.4,183.6 153.5,177.1 155.8,175.8 158.1,171.2 162.9,174.4 166.5,170.4 168.8,169.6 173.7,172.7 176.8,172.1 179.7,174.0 179.2,175.3 179.8,178.8Z" data-cc="AT" data-rail="1"/>
+<path d="M212.7,175.8 216.2,178.5 216.7,181.2 212.8,183.3 209.7,190.1 205.8,196.8 200.7,198.7 196.7,198.3 191.7,200.9 191.7,200.9 189.3,202.4 184.0,200.5 179.2,196.2 177.2,195.0 175.9,191.6 174.9,191.5 177.0,185.0 175.7,182.9 179.4,182.9 179.8,178.8 183.1,181.3 185.5,182.4 190.9,181.2 191.4,179.2 194.0,178.9 197.1,177.3 197.8,178.0 200.8,176.7 202.3,174.4 204.4,173.8 211.3,176.8 212.7,175.8Z" data-cc="HU" data-rail="0"/>
+<path d="M241.8,177.8 243.3,176.3 247.6,175.3 252.4,178.4 255.0,178.8 257.9,181.5 257.4,184.9 259.8,186.5 260.7,190.7 263.0,193.3 262.5,194.7 263.7,195.8 262.0,196.5 258.2,196.2 257.6,194.8 256.2,195.6 256.7,197.4 254.9,200.6 253.8,204.0 252.2,205.1 251.0,200.6 251.7,196.3 251.5,191.9 247.8,185.9 245.8,181.7 243.8,178.8 241.8,177.8Z" data-cc="MD" data-rail="0"/>
+<path d="M252.2,205.1 255.1,207.0 258.1,205.4 261.0,207.1 261.1,209.6 258.0,211.8 256.1,210.9 254.3,222.9 250.5,221.9 245.8,218.2 238.3,220.6 235.1,223.1 225.6,222.6 220.7,221.0 218.2,221.8 216.3,217.7 215.2,215.9 216.7,214.2 215.1,213.0 213.1,215.2 209.3,212.3 208.8,208.2 204.9,205.8 204.2,202.7 200.7,198.7 205.8,196.8 209.7,190.1 212.8,183.3 216.7,181.2 219.5,179.0 223.4,180.1 227.6,180.2 230.5,182.6 232.7,181.1 237.5,180.1 239.1,177.8 241.8,177.8 243.8,178.8 245.8,181.7 247.8,185.9 251.5,191.9 251.7,196.3 251.0,200.6 252.2,205.1Z" data-cc="RO" data-rail="0"/>
+<path d="M241.0,103.8 241.6,108.3 236.3,111.5 234.9,117.2 227.9,120.9 221.7,120.9 220.1,117.8 216.8,116.7 216.3,114.2 217.0,111.4 214.1,109.8 207.4,108.1 206.1,99.7 213.4,96.6 224.2,97.3 230.5,96.3 231.4,98.4 234.8,99.0 241.0,103.8Z" data-cc="LT" data-rail="0"/>
+<path d="M246.1,85.3 249.2,87.6 249.8,92.4 251.8,98.3 244.9,102.2 241.0,103.8 234.8,99.0 231.4,98.4 230.5,96.3 224.2,97.3 213.4,96.6 206.1,99.7 206.3,92.2 209.4,85.9 215.5,82.5 220.6,89.9 225.8,89.7 227.0,82.1 232.5,80.3 235.3,81.5 240.8,85.2 246.1,85.3Z" data-cc="LV" data-rail="0"/>
+<path d="M250.6,65.2 250.6,65.2 251.5,67.0 247.0,72.8 248.9,82.1 246.1,85.3 240.8,85.2 235.3,81.5 232.5,80.3 227.0,82.1 227.7,76.2 225.4,77.4 221.3,73.9 220.7,68.1 228.9,65.3 237.0,63.9 243.9,65.5 250.6,65.2 250.6,65.2Z" data-cc="EE" data-rail="1"/>
+<path d="M161.5,122.4 163.0,127.5 161.2,130.2 163.5,133.8 165.1,139.1 164.6,142.5 167.2,148.9 164.4,150.0 162.7,148.8 161.1,150.7 156.4,152.7 154.1,155.2 149.4,157.3 150.5,160.3 151.2,164.5 154.5,166.9 158.1,171.2 155.8,175.8 153.5,177.1 154.4,183.6 153.8,185.3 151.8,183.3 148.7,183.0 144.2,184.8 138.5,184.3 137.6,187.0 134.3,184.2 132.4,184.7 125.5,181.7 124.2,183.9 118.7,183.8 119.5,176.7 122.8,169.8 113.5,168.0 110.5,165.4 110.8,161.0 109.6,158.7 110.3,152.0 109.2,141.5 113.1,141.5 114.7,137.7 116.3,128.6 115.1,125.2 116.3,123.1 121.7,122.5 122.9,124.7 127.3,119.8 125.8,116.0 125.5,110.4 130.4,111.7 134.5,110.2 134.6,114.0 141.1,116.4 141.0,119.9 147.6,118.0 151.2,115.3 158.4,119.2 161.5,122.4Z" data-cc="DE" data-rail="1"/>
+<path d="M216.3,217.7 218.2,221.8 220.7,221.0 225.6,222.6 235.1,223.1 238.3,220.6 245.8,218.2 250.5,221.9 254.3,222.9 250.9,227.1 248.6,234.2 250.7,239.9 245.1,238.6 238.6,241.7 238.5,246.7 232.7,247.7 228.1,244.2 223.0,246.9 218.2,246.6 217.8,240.0 214.6,236.8 215.6,235.4 214.9,234.2 216.0,231.0 218.5,227.9 215.3,223.6 214.8,219.9 216.3,217.7Z" data-cc="BG" data-rail="0"/>
+<path d="M239.7,307.0 238.9,310.0 229.6,310.8 229.7,309.2 221.9,307.2 223.0,302.9 226.6,306.3 231.6,305.8 236.3,306.5 236.2,308.2 239.7,307.0ZM218.2,246.6 223.0,246.9 228.1,244.2 232.7,247.7 238.5,246.7 238.6,241.7 241.7,244.4 239.7,250.6 238.2,251.8 234.3,251.5 230.9,250.5 223.1,253.1 227.6,258.8 224.3,260.4 220.8,260.4 217.4,255.2 216.1,257.4 217.6,263.4 220.8,268.1 218.4,270.3 222.0,274.9 225.1,277.8 225.2,283.4 219.3,280.8 221.2,285.9 217.1,286.9 219.5,295.8 215.3,295.9 210.0,291.6 207.6,283.6 206.5,276.9 204.0,272.3 200.7,266.6 200.2,263.8 203.2,258.9 203.6,255.6 205.7,254.2 205.8,251.6 210.0,250.7 212.5,248.5 216.0,248.7 217.0,247.0 218.2,246.6Z" data-cc="GR" data-rail="0"/>
+<path d="M358.5,288.3 355.4,290.0 353.2,287.4 345.7,286.1 342.9,287.7 335.6,289.3 332.1,289.1 324.8,292.8 319.5,292.9 316.0,291.0 309.0,293.8 306.9,291.8 306.5,297.4 304.8,299.6 303.1,301.8 300.7,297.3 303.1,293.5 299.2,294.3 293.8,292.0 289.4,297.8 279.7,298.9 274.5,293.6 267.5,293.2 266.1,297.4 261.6,298.6 255.4,293.2 248.4,293.4 244.6,283.5 239.9,277.9 243.0,270.1 238.9,265.4 246.1,255.8 256.0,255.4 258.7,247.8 270.9,249.1 278.6,242.6 286.1,239.8 296.8,239.6 308.0,246.6 317.2,250.5 324.7,249.0 330.2,249.9 337.8,244.6 344.7,244.2 350.9,249.1 351.9,252.6 351.3,257.5 356.1,259.9 358.6,262.9 354.2,265.7 356.2,277.2 355.0,280.3 358.5,288.3 358.5,288.3ZM238.6,241.7 245.1,238.6 250.7,239.9 251.4,243.8 257.0,247.0 255.9,249.5 248.2,250.0 245.5,253.1 240.1,258.5 238.1,253.8 238.2,251.8 239.7,250.6 241.7,244.4 238.6,241.7Z" data-cc="TR" data-rail="0"/>
+<path d="M205.8,251.6 205.7,254.2 203.6,255.6 203.2,258.9 200.2,263.8 199.1,263.1 199.0,260.8 195.4,257.5 194.9,252.7 195.4,245.9 196.3,242.8 195.2,241.2 195.2,241.2 194.8,238.0 197.6,233.1 198.0,235.0 199.7,234.1 201.1,236.8 202.6,237.8 203.1,241.4 203.1,241.4 202.2,244.8 203.2,249.1 205.8,251.6Z" data-cc="AL" data-rail="0"/>
+<path d="M177.2,195.0 179.2,196.2 184.0,200.5 189.3,202.4 191.7,200.9 193.3,204.8 195.3,207.6 192.9,211.4 190.0,209.2 185.5,209.3 180.0,207.7 177.0,207.9 175.6,210.0 173.3,207.7 171.9,211.8 175.1,216.5 176.5,219.6 179.4,223.3 181.9,225.5 184.3,229.7 190.0,233.5 189.3,235.2 189.3,235.2 183.3,231.5 179.5,227.9 173.7,224.9 168.2,217.6 169.5,216.8 166.6,212.6 166.5,209.2 162.4,207.7 160.4,212.0 158.5,208.6 158.6,205.2 158.9,205.0 163.3,205.3 164.5,203.7 166.7,205.3 169.2,205.5 169.2,202.7 171.4,201.7 172.1,197.6 177.2,195.0Z" data-cc="HR" data-rail="0"/>
+<path d="M132.4,184.7 132.6,186.5 131.6,189.0 134.6,190.8 137.8,191.1 137.3,195.2 134.5,196.9 129.7,195.6 128.3,199.6 125.3,199.9 124.2,198.4 120.6,201.8 117.5,202.2 114.7,200.1 112.5,195.7 109.4,197.3 109.5,192.7 114.2,187.1 114.0,184.6 116.9,185.5 118.7,183.8 124.2,183.9 125.5,181.7 132.4,184.7Z" data-cc="CH" data-rail="1"/>
+<path d="M109.6,158.7 110.8,161.0 110.5,165.4 108.6,165.6 107.2,164.7 107.9,159.1 109.6,158.7Z" data-cc="LU" data-rail="1"/>
+<path d="M110.3,152.0 109.6,158.7 107.9,159.1 107.2,164.7 101.6,160.1 98.3,160.9 93.8,156.2 90.8,152.2 87.8,152.0 86.9,148.5 92.0,146.5 92.0,146.5 92.0,146.5 96.7,147.3 102.7,145.2 106.7,149.6 110.3,152.0Z" data-cc="BE" data-rail="1"/>
+<path d="M115.1,125.2 116.3,128.6 114.7,137.7 113.1,141.5 109.2,141.5 110.3,152.0 106.7,149.6 102.7,145.2 96.7,147.3 92.0,146.5 92.0,146.5 95.3,143.8 101.0,129.1 109.8,124.9 115.1,125.2Z" data-cc="NL" data-rail="1"/>
+<path d="M12.6,241.2 15.0,238.7 17.6,237.2 19.2,242.1 23.0,242.1 24.1,240.8 27.8,241.2 29.6,246.2 26.7,248.9 26.6,256.7 25.5,258.2 25.3,262.9 22.5,263.7 25.1,269.7 23.3,276.3 25.5,279.2 24.6,282.0 22.3,285.7 22.8,289.0 20.2,291.6 16.8,290.2 13.5,291.3 14.5,283.5 13.9,277.3 11.0,276.4 9.5,272.6 10.0,266.1 12.5,262.4 13.0,258.4 14.3,252.4 14.2,248.2 12.9,244.6 12.6,241.2Z" data-cc="PT" data-rail="0"/>
+<path d="M22.8,289.0 22.3,285.7 24.6,282.0 25.5,279.2 23.3,276.3 25.1,269.7 22.5,263.7 25.3,262.9 25.5,258.2 26.6,256.7 26.7,248.9 29.6,246.2 27.8,241.2 24.1,240.8 23.0,242.1 19.2,242.1 17.6,237.2 15.0,238.7 12.6,241.2 13.0,234.1 10.3,229.7 19.4,222.5 27.3,224.3 35.9,224.3 42.8,226.0 48.1,225.4 58.5,225.8 61.0,229.7 72.9,234.2 75.2,232.0 82.4,236.6 89.9,235.3 90.2,241.1 84.2,247.7 75.9,249.9 75.3,253.2 71.4,258.8 68.9,266.9 71.4,272.6 67.7,277.1 66.3,283.6 61.5,285.6 56.9,293.3 48.8,293.4 42.6,293.2 38.6,296.8 36.1,300.5 33.0,299.7 30.6,296.3 28.8,290.6 22.8,289.0Z" data-cc="ES" data-rail="0"/>
+<path d="M30.9,121.3 31.9,128.5 27.1,137.4 15.7,143.3 6.6,141.8 11.8,131.4 8.4,121.2 17.2,113.4 22.0,108.7 23.4,114.0 22.0,119.4 26.0,119.3 30.9,121.3Z" data-cc="IE" data-rail="1"/>
+<path d="M137.8,191.1 141.7,192.5 142.5,190.6 148.8,188.8 150.3,192.3 159.5,194.9 158.8,199.8 160.3,204.1 155.2,202.6 150.0,206.2 150.3,211.1 149.5,214.0 151.6,219.1 157.7,224.1 160.9,232.4 168.0,240.4 173.1,240.4 174.6,242.6 172.8,244.6 178.6,248.2 183.3,251.2 188.8,256.4 189.5,258.3 188.3,261.9 184.7,257.2 179.1,255.6 176.4,262.0 181.1,265.8 180.3,271.0 177.6,271.6 174.2,280.1 171.5,280.9 171.5,277.9 172.9,272.5 174.3,270.4 171.7,264.6 169.8,259.5 167.1,258.3 165.2,254.0 161.1,252.1 158.3,248.1 153.5,247.5 148.5,243.0 142.6,236.4 138.3,230.7 136.3,220.8 133.1,219.6 127.8,216.3 124.9,217.7 121.2,222.3 118.5,223.1 119.2,218.7 115.8,217.5 114.1,209.7 116.3,206.7 114.4,202.9 114.7,200.1 117.5,202.2 120.6,201.8 124.2,198.4 125.3,199.9 128.3,199.6 129.7,195.6 134.5,196.9 137.3,195.2 137.8,191.1ZM165.6,278.6 170.5,277.7 168.2,285.6 169.1,288.7 167.8,293.8 162.9,290.0 159.6,289.0 150.6,283.9 151.5,278.7 159.0,279.7 165.6,278.6ZM126.7,251.0 129.9,247.9 133.8,255.0 132.9,268.2 129.9,267.6 127.3,270.9 124.9,268.3 124.6,256.2 123.2,250.5 126.7,251.0Z" data-cc="IT" data-rail="1"/>
+<path d="M134.5,110.2 130.4,111.7 125.5,110.4 122.9,104.8 122.7,94.6 123.8,91.9 125.6,88.9 131.3,88.3 133.5,85.5 138.7,82.7 138.5,87.8 136.6,91.1 137.4,93.9 140.8,95.4 139.3,99.2 137.4,98.1 132.7,105.3 134.5,110.2ZM150.2,98.9 152.3,103.9 148.4,112.0 141.7,106.4 140.8,102.2 150.2,98.9Z" data-cc="DK" data-rail="1"/>
+<path d="M30.9,121.3 26.0,119.3 22.0,119.4 23.4,114.0 22.0,108.7 27.4,108.3 34.3,114.5 30.9,121.3ZM50.8,126.0 50.8,126.0 51.8,120.2 47.5,114.0 47.4,113.8 39.6,112.1 38.0,109.4 40.4,104.9 38.3,102.2 34.8,106.9 34.4,97.2 31.2,92.1 33.5,81.8 38.5,73.7 43.6,74.5 51.4,73.7 44.5,84.5 51.1,83.1 58.1,83.2 56.4,91.3 50.7,100.3 57.3,100.9 57.8,102.0 63.5,113.8 67.9,115.4 71.9,126.7 73.7,130.7 81.5,132.6 80.7,139.0 77.5,141.9 80.0,147.1 74.2,152.3 65.6,152.3 54.7,155.0 51.7,153.0 47.5,157.7 41.5,156.6 37.0,160.4 33.6,158.4 43.0,147.9 48.8,145.7 48.7,145.7 38.7,144.1 36.8,140.1 43.6,137.0 40.0,131.6 41.3,125.0 50.8,126.0Z" data-cc="GB" data-rail="1"/>
+<path d="M-22.6,-4.6 -24.0,1.9 -16.8,8.7 -25.1,16.4 -43.7,23.2 -49.2,25.0 -57.7,23.6 -75.6,20.4 -69.3,16.0 -83.3,11.1 -71.9,9.2 -72.2,6.2 -85.7,3.9 -81.3,-2.6 -71.6,-4.1 -61.6,2.7 -51.8,-2.8 -43.7,0.1 -33.2,-5.3 -22.6,-4.6Z" data-cc="IS" data-rail="0"/>
+<path d="M159.5,194.9 164.8,195.7 168.0,193.4 173.6,193.2 174.9,191.5 175.9,191.6 177.2,195.0 172.1,197.6 171.4,201.7 169.2,202.7 169.2,205.5 166.7,205.3 164.5,203.7 163.3,205.3 158.9,205.0 160.3,204.1 158.8,199.8 159.5,194.9Z" data-cc="SI" data-rail="0"/>
+<path d="M254.5,-30.6 253.6,-23.6 263.4,-17.0 257.5,-9.4 264.9,1.9 260.6,10.5 266.4,18.0 263.8,24.5 273.3,31.3 270.9,36.4 264.9,42.2 251.1,55.0 251.1,55.0 251.1,55.0 239.5,55.8 228.2,59.4 217.7,61.5 214.0,56.1 207.8,52.8 209.2,42.9 206.1,33.9 209.1,28.1 215.0,21.8 229.7,11.0 234.0,8.9 233.3,4.7 224.4,-0.1 222.2,-4.0 222.0,-19.4 212.0,-26.2 203.4,-31.1 207.3,-33.7 214.4,-28.4 222.8,-28.9 229.7,-26.5 235.8,-30.9 239.0,-38.3 249.0,-41.6 257.2,-37.7 254.5,-30.6Z" data-cc="FI" data-rail="1"/>
+<path d="M215.7,169.1 213.9,171.7 212.7,175.8 211.3,176.8 204.4,173.8 202.3,174.4 200.8,176.7 197.8,178.0 197.1,177.3 194.0,178.9 191.4,179.2 190.9,181.2 185.5,182.4 183.1,181.3 179.8,178.8 179.2,175.3 179.7,174.0 180.6,171.8 183.5,172.0 185.7,171.0 185.9,170.0 187.1,169.6 187.5,167.3 189.0,166.8 190.0,165.0 191.9,165.0 192.3,165.6 194.9,164.3 198.1,167.8 201.9,165.7 205.0,166.7 209.6,165.3 215.7,169.1Z" data-cc="SK" data-rail="0"/>
+<path d="M167.2,148.9 170.3,152.2 175.1,153.0 174.7,155.8 178.2,157.8 179.1,155.3 183.5,156.4 184.2,159.5 188.9,160.1 191.9,165.0 190.0,165.0 189.0,166.8 187.5,167.3 187.1,169.6 185.9,170.0 185.7,171.0 183.5,172.0 180.6,171.8 179.7,174.0 176.8,172.1 173.7,172.7 168.8,169.6 166.5,170.4 162.9,174.4 158.1,171.2 154.5,166.9 151.2,164.5 150.5,160.3 149.4,157.3 154.1,155.2 156.4,152.7 161.1,150.7 162.7,148.8 164.4,150.0 167.2,148.9Z" data-cc="CZ" data-rail="0"/>
+<path d="M281.1,308.6 281.6,308.5 282.5,306.1 287.1,306.3 293.0,303.3 288.6,307.5 289.1,309.4 288.4,309.1 287.2,309.8 286.2,309.6 285.9,310.0 285.8,309.0 285.3,308.4 284.1,308.3 282.3,309.1 281.1,308.6Z" data-cc="" data-rail="0"/>
+<path d="M281.1,308.6 282.3,309.1 284.1,308.3 285.3,308.4 285.8,309.0 285.9,310.0 286.2,309.6 287.2,309.8 288.4,309.1 289.1,309.4 289.3,310.2 282.7,314.3 279.6,313.0 278.0,309.0 281.1,308.6Z" data-cc="CY" data-rail="0"/>
+<path d="M56.8,308.3 59.2,314.7 59.6,320.8 61.8,331.4 63.5,333.5 62.3,337.4 53.9,339.1 51.0,342.8 47.3,343.6 47.0,351.0 39.5,355.0 37.0,360.0 31.7,362.7 25.3,364.2 15.0,371.6 15.0,383.4 14.0,383.4 14.2,388.8 10.2,389.1 8.1,391.4 5.2,391.4 2.9,390.1 -2.5,391.2 -4.6,399.0 -6.6,399.7 -9.6,412.3 -18.6,423.1 -20.7,436.9 -23.3,441.4 -24.1,445.0 -38.6,445.8 -38.7,445.8 -38.4,441.1 -35.9,438.4 -33.8,433.2 -34.2,429.8 -32.0,422.8 -28.4,416.4 -26.3,414.8 -24.6,409.0 -24.4,403.6 -22.1,397.5 -17.8,393.8 -13.8,383.6 -13.6,383.5 -10.4,379.6 -4.4,378.5 0.6,371.7 3.9,369.0 9.2,360.7 7.6,348.2 10.1,339.6 10.9,334.4 15.1,327.6 21.5,323.0 26.3,318.9 30.6,308.5 32.6,302.4 37.3,302.4 41.2,306.7 47.3,306.0 54.0,308.2 56.8,308.3Z" data-cc="MA" data-rail="0"/>
+<path d="M231.4,440 231.4,460.0 224.0,460 223.9,464.2 198.3,445.0 172.7,425.9 166.2,431.4 161.6,435.1 158.0,429.6 147.8,425.3 145.0,419.0 139.9,414.4 136.9,416.2 134.7,410.6 134.4,406.3 130.6,399.1 133.2,394.9 132.6,388.6 133.4,383.1 133.0,378.6 134.1,370.4 133.7,365.8 131.7,356.9 134.8,354.6 135.3,350.4 134.7,346.2 139.1,342.4 141.1,339.2 144.2,336.3 144.6,328.6 152.1,332.1 154.8,331.2 160.2,332.9 168.7,337.3 171.7,346.2 177.5,348.2 186.5,352.4 193.4,357.3 196.5,354.7 199.6,350.1 198.1,342.5 200.1,337.6 204.8,332.9 209.2,331.6 217.9,333.6 220.1,338.1 222.5,338.1 224.5,339.8 230.9,341.0 232.5,344.3 230.1,349.1 231.1,353.4 229.5,359.6 231.4,367.6 231.4,403.2 231.4,440Z" data-cc="LY" data-rail="0"/>
+<path d="M190.0,233.5 184.3,229.7 181.9,225.5 179.4,223.3 176.5,219.6 175.1,216.5 171.9,211.8 173.3,207.7 175.6,210.0 177.0,207.9 180.0,207.7 185.5,209.3 190.0,209.2 192.9,211.4 192.9,211.4 195.2,211.4 193.6,215.8 196.7,219.6 195.8,224.3 194.2,224.8 193.0,225.7 190.9,228.0 190.0,233.5Z" data-cc="BA" data-rail="0"/>
+<path d="M214.6,236.8 217.8,240.0 218.2,246.6 217.0,247.0 216.0,248.7 212.5,248.5 210.0,250.7 205.8,251.6 203.2,249.1 202.2,244.8 203.1,241.4 203.1,241.4 203.9,241.5 204.2,239.5 208.0,237.9 209.4,237.5 211.6,237.0 214.6,236.8Z" data-cc="MK" data-rail="0"/>
+<path d="M191.7,200.9 191.7,200.9 196.7,198.3 200.7,198.7 204.2,202.7 204.9,205.8 208.8,208.2 209.3,212.3 213.1,215.2 215.1,213.0 216.7,214.2 215.2,215.9 216.3,217.7 214.8,219.9 215.3,223.6 218.5,227.9 216.0,231.0 214.9,234.2 215.6,235.4 214.6,236.8 211.6,237.0 209.4,237.5 209.2,236.8 210.0,235.6 210.7,233.2 209.8,233.2 208.5,231.4 207.5,230.9 206.6,229.3 205.4,228.7 204.5,227.3 203.3,227.8 202.5,231.2 200.9,231.9 201.4,231.0 199.0,228.9 196.9,227.9 195.9,226.5 194.2,224.8 195.8,224.3 196.7,219.6 193.6,215.8 195.2,211.4 192.9,211.4 192.9,211.4 195.3,207.6 193.3,204.8 191.7,200.9Z" data-cc="RS" data-rail="0"/>
+<path d="M199.7,234.1 198.0,235.0 197.6,233.1 194.8,238.0 195.2,241.2 193.9,240.4 192.1,237.2 189.3,235.2 190.0,233.5 190.9,228.0 193.0,225.7 194.2,224.8 195.9,226.5 196.9,227.9 199.0,228.9 201.4,231.0 200.9,231.9 199.7,234.1Z" data-cc="ME" data-rail="0"/>
+<path d="M203.1,241.4 202.6,237.8 201.1,236.8 199.7,234.1 200.9,231.9 202.5,231.2 203.3,227.8 204.5,227.3 205.4,228.7 206.6,229.3 207.5,230.9 208.5,231.4 209.8,233.2 210.7,233.2 210.0,235.6 209.2,236.8 209.4,237.5 208.0,237.9 204.2,239.5 203.9,241.5 203.1,241.4Z" data-cc="XK" data-rail="0"/><path d="M131.96,187.29 131.97,187.37 131.9,187.56 131.82,187.71 131.78,187.8 131.77,187.89 131.71,188.03 131.68,188.19 131.72,188.37 131.77,188.5 131.82,188.58 131.9,188.98 131.87,189.14 131.72,189.26 131.59,189.36 131.62,189.48 131.62,189.46 131.64,189.44 131.66,189.44 131.65,189.47 131.68,189.51 131.72,189.44 131.73,189.43 131.76,189.46 131.77,189.43 131.79,189.44 131.86,189.43 131.88,189.4 131.97,189.37 132.03,189.35 132.06,189.38 132.09,189.39 132.11,189.43 132.12,189.49 132.14,189.51 132.16,189.52 132.19,189.49 132.26,189.47 132.3,189.47 132.36,189.43 132.41,189.41 132.44,189.38 132.46,189.39 132.5,189.34 132.49,189.21 132.54,189.21 132.57,189.17 132.63,189.16 132.64,188.99 132.55,188.89 132.64,188.73 132.57,188.68 132.58,188.55 132.55,188.48 132.5,188.52 132.46,188.51 132.4,188.37 132.28,188.29 132.19,188.3 132.25,188.23 132.24,188.09 132.32,187.96 132.23,187.81 132.11,187.75 132.2,187.59 132.16,187.51 131.96,187.29Z" data-cc="LI" data-rail="0"/></g>
+        <g class="coverage-regions"><path d="M132.7,162.2 132.8,162.4 132.7,162.5 132.7,162.6 132.7,162.6 132.8,162.7 132.7,162.6 132.7,162.7 132.6,162.7 132.7,162.8 132.6,162.9 132.6,163.0 132.7,163.1 132.9,163.2 132.9,163.1 132.9,162.9 133.1,162.9 133.2,162.8 133.3,163.2 133.4,163.1 133.4,162.9 133.7,162.8 133.7,162.7 133.7,162.9 133.9,163.0 134.0,163.2 133.9,163.3 133.9,163.5 133.9,163.5 133.9,163.5 134.0,163.6 134.1,163.6 134.2,164.0 134.1,164.0 134.1,164.0 134.0,164.1 134.0,164.3 133.9,164.4 133.9,164.5 134.1,164.6 134.2,164.5 134.2,164.4 134.2,164.3 134.5,164.2 134.4,164.4 134.6,164.4 134.5,164.5 134.6,164.5 134.5,164.6 134.6,164.7 134.5,164.9 134.6,165.0 134.5,165.1 134.6,165.2 135.1,165.2 135.2,165.1 135.4,165.0 135.4,164.8 135.3,164.8 135.4,164.7 135.4,164.6 135.6,164.6 135.6,164.7 135.5,164.8 135.6,165.0 135.8,164.9 135.7,165.1 135.8,165.4 135.7,165.5 135.6,165.6 135.9,165.6 135.9,165.8 135.9,165.8 136.0,165.9 136.0,166.0 136.1,166.1 136.0,166.2 135.8,166.2 135.7,166.2 135.8,166.5 135.7,166.5 135.7,166.6 135.8,166.8 136.0,166.7 136.0,166.9 135.9,166.9 135.9,167.1 136.0,167.2 135.9,167.4 135.8,167.3 135.9,167.3 135.8,167.3 135.8,167.5 135.9,167.5 135.8,167.6 135.9,167.6 135.9,167.8 135.9,167.9 135.9,167.9 135.8,168.0 136.3,168.3 136.3,168.5 136.4,168.4 136.5,168.4 136.5,168.5 136.7,168.6 136.7,168.7 136.6,168.8 136.5,168.9 136.4,168.9 136.4,169.0 136.7,169.1 136.7,169.2 136.6,169.2 136.6,169.2 136.7,169.3 136.7,169.6 136.8,169.5 136.9,169.6 137.0,169.6 137.0,169.7 137.1,169.7 137.2,169.7 137.3,169.7 137.3,169.8 137.4,169.9 137.3,170.0 137.5,170.0 137.5,170.1 137.7,170.1 137.7,170.2 137.7,170.2 137.7,170.3 137.8,170.3 137.8,170.5 138.0,170.6 137.9,170.6 138.0,170.7 138.0,170.8 137.8,170.9 137.8,171.0 138.0,171.1 137.9,171.2 138.0,171.4 137.8,171.5 137.8,171.6 137.9,171.7 137.9,171.8 137.9,171.9 137.8,172.0 137.8,171.9 137.8,172.0 137.8,172.0 137.8,172.2 137.8,172.2 137.7,172.2 137.8,172.4 137.7,172.4 137.7,172.5 137.9,172.6 137.9,172.7 138.0,172.6 138.0,172.6 138.1,172.8 138.1,172.8 138.2,173.1 138.2,173.1 137.9,173.3 137.7,173.3 137.7,173.3 137.8,173.3 137.7,173.1 137.8,173.1 137.8,173.1 137.9,173.0 137.7,173.0 137.5,173.1 137.5,173.3 137.3,173.4 137.2,173.0 137.1,173.0 137.1,173.1 136.8,172.9 136.7,173.0 136.8,173.1 136.7,173.2 136.7,173.2 136.7,173.3 136.8,173.4 136.7,173.5 136.9,173.6 137.1,173.9 136.9,173.9 137.0,173.9 136.9,173.9 136.9,174.0 137.0,174.1 137.0,174.4 137.1,174.4 137.0,174.4 137.0,174.6 137.0,174.7 136.9,174.8 136.6,174.7 136.6,174.8 136.5,174.8 136.6,175.0 136.2,175.2 136.2,175.3 136.1,175.3 135.8,175.4 135.8,175.2 135.7,175.2 135.6,175.3 135.6,175.3 135.4,175.4 135.2,175.4 135.3,175.5 135.2,175.6 135.3,175.7 135.1,175.8 135.1,175.9 134.8,176.2 134.8,176.3 134.9,176.3 134.9,176.3 135.0,176.3 135.0,176.5 135.1,176.5 135.3,177.0 135.4,177.1 135.4,177.4 135.5,177.4 135.4,177.5 135.4,177.7 135.5,177.7 135.5,177.8 135.5,178.1 135.6,178.1 135.7,178.6 135.8,178.8 135.9,178.8 135.9,179.0 135.9,179.0 135.9,179.0 135.9,179.1 135.9,179.5 135.8,179.6 135.9,179.8 135.8,179.9 135.7,180.2 135.6,180.2 135.5,180.4 135.6,180.5 135.7,180.6 135.7,180.7 135.7,180.9 135.6,180.9 135.7,181.2 135.5,181.3 135.5,181.4 135.7,181.3 135.6,181.5 135.6,181.5 135.7,181.4 135.7,181.5 135.6,181.5 135.8,181.8 135.7,181.9 135.7,182.0 135.6,181.9 135.6,182.0 135.4,182.1 135.5,182.2 135.5,182.3 135.7,182.4 135.7,182.8 135.8,182.9 135.9,182.9 135.8,183.1 135.8,183.2 135.6,183.3 135.5,183.2 135.6,183.3 135.5,183.4 135.5,183.6 135.4,183.5 135.5,183.4 135.4,183.4 135.3,183.2 135.2,183.2 135.1,183.1 135.0,183.2 134.8,183.5 134.0,183.2 133.9,183.2 133.9,183.3 133.9,183.4 133.7,183.5 133.7,183.6 133.4,183.9 133.3,183.9 133.4,183.8 133.1,184.0 133.0,183.9 133.0,183.9 132.9,183.9 132.8,183.9 132.8,183.9 132.7,183.9 132.7,184.1 132.6,184.1 132.5,184.2 132.4,184.1 132.2,184.1 132.0,184.0 131.9,183.6 131.8,183.5 131.6,183.5 131.2,183.3 130.8,183.4 130.6,183.2 130.2,182.9 130.1,182.7 130.0,182.5 129.5,182.2 129.0,181.8 128.8,181.8 128.8,181.9 129.0,182.2 129.7,182.6 129.7,182.9 129.9,183.1 130.0,183.3 129.8,183.3 129.8,183.4 129.6,183.4 129.6,183.5 129.2,183.1 129.3,183.0 129.2,183.0 128.5,182.5 128.5,182.6 128.6,182.7 128.3,182.6 128.2,182.7 128.5,182.9 128.6,183.0 128.2,183.4 127.9,183.4 127.8,183.4 127.7,183.2 127.6,183.2 127.6,183.0 127.8,183.0 127.7,182.9 127.6,182.9 127.6,182.8 127.4,182.8 127.4,182.8 127.3,182.7 127.3,182.6 127.1,182.8 127.1,182.9 127.3,183.0 127.3,183.1 127.3,183.2 126.8,183.0 126.9,182.8 126.7,182.6 126.8,182.5 126.9,182.5 126.8,182.3 126.7,182.3 126.6,182.4 126.5,182.1 126.3,181.9 126.3,182.0 126.3,182.3 126.2,182.3 126.1,182.1 126.1,182.0 125.8,181.9 125.8,181.9 125.7,182.0 125.8,182.1 125.3,182.2 125.2,182.3 125.0,182.5 125.0,182.7 124.7,182.9 124.8,183.1 124.7,183.2 125.0,183.4 125.1,183.4 125.2,183.6 125.2,183.6 125.2,183.5 125.3,183.5 125.6,183.5 125.6,183.3 125.8,183.3 125.9,183.3 126.0,183.2 126.2,183.5 126.0,183.6 126.1,183.5 126.0,183.4 126.0,183.5 126.0,183.8 125.9,184.0 125.7,184.0 125.8,183.8 125.7,183.7 125.5,183.6 125.4,183.8 125.1,183.9 125.1,184.1 125.3,184.1 125.3,184.1 124.9,184.3 124.7,184.2 124.6,184.3 124.2,184.3 124.0,184.1 124.0,183.9 123.8,183.8 123.6,183.9 123.4,183.7 123.2,184.0 122.8,184.1 122.8,184.3 122.7,184.4 122.6,184.3 122.3,184.4 121.9,184.4 121.8,184.5 121.6,184.4 121.5,184.2 121.4,184.1 121.1,184.1 121.0,184.1 120.8,184.4 120.3,184.5 120.2,184.6 120.0,184.6 119.8,184.4 120.1,184.3 120.0,184.1 120.0,184.1 119.8,184.0 119.7,184.2 119.6,184.2 119.3,183.7 119.1,183.4 119.0,183.0 119.2,182.8 119.2,182.6 119.1,182.2 119.3,181.6 119.3,181.2 119.4,181.0 119.4,180.7 119.7,180.3 119.6,180.0 119.4,179.6 119.4,178.8 119.6,178.6 119.6,178.4 119.8,178.0 120.0,177.8 120.2,177.0 120.5,176.7 120.4,176.2 120.4,176.0 120.6,175.4 120.6,175.1 120.9,174.9 120.9,174.1 121.1,173.5 121.5,173.3 121.9,172.8 121.9,172.4 122.2,172.4 122.3,172.1 122.5,172.1 122.7,172.0 122.8,171.8 123.0,171.0 123.4,170.4 123.7,170.3 124.0,170.0 124.2,169.4 124.5,169.0 124.5,168.4 124.5,168.3 124.6,168.1 124.6,168.0 124.7,167.8 124.7,167.7 124.6,167.8 124.6,167.7 125.3,167.0 125.0,166.8 125.0,166.7 125.3,166.4 125.4,166.1 125.3,166.1 125.1,166.2 125.1,166.1 125.3,166.0 125.4,165.6 125.3,165.5 125.0,165.5 125.0,165.4 125.1,165.3 125.0,165.1 124.8,164.5 124.9,164.1 125.1,164.1 125.7,164.8 125.9,164.8 126.1,164.5 126.1,164.3 126.0,164.0 126.0,164.0 126.0,163.9 126.6,163.7 126.5,163.9 126.6,163.9 126.7,164.0 126.5,164.1 126.5,164.2 126.5,164.2 126.8,164.8 126.9,164.7 127.3,164.8 127.3,164.7 127.4,164.7 127.4,164.9 127.5,165.0 127.5,164.9 127.9,164.9 127.9,165.1 127.8,165.3 127.7,165.3 127.7,165.2 127.7,165.1 127.5,165.2 127.5,165.6 127.5,165.7 127.4,165.7 127.3,165.7 127.3,165.8 127.3,165.8 127.4,166.0 127.5,165.8 127.6,166.0 127.6,166.0 127.9,165.7 127.9,165.5 128.0,165.5 128.1,165.5 128.1,165.4 128.3,165.4 128.2,165.3 128.2,165.2 128.2,165.1 128.3,165.1 128.3,165.0 128.3,164.9 128.4,164.9 128.5,164.8 128.5,164.9 128.9,164.9 129.0,164.6 129.1,164.7 129.2,164.7 129.3,164.9 129.4,164.8 129.3,164.6 129.2,164.5 129.2,164.5 129.2,164.5 129.2,164.4 129.3,164.4 129.3,164.2 129.4,164.2 129.6,164.2 129.9,164.2 130.2,164.1 130.2,164.1 130.3,164.1 130.3,163.9 130.4,163.8 130.4,163.7 130.5,163.7 130.5,163.5 130.5,163.5 130.6,163.4 130.8,163.5 130.9,163.4 131.1,163.6 131.2,163.5 131.3,163.4 131.2,163.3 131.3,163.1 131.3,162.9 131.1,162.7 131.1,163.0 130.9,163.0 130.9,162.8 130.8,162.8 131.0,162.7 130.5,162.6 130.7,162.6 130.6,162.3 130.9,162.3 131.0,162.2 131.1,162.3 131.3,162.1 131.4,162.1 131.5,162.3 131.6,162.3 131.7,162.1 131.8,162.1 131.9,162.2 131.9,162.4 132.0,162.4 132.1,162.4 132.2,162.4 132.2,162.6 132.2,162.6 132.3,162.5 132.2,162.4 132.2,162.2 132.4,162.2 132.8,162.1 132.8,162.2 132.7,162.2ZM126.7,182.8 126.8,183.0 126.6,183.0 126.5,183.1 126.4,183.0 126.5,183.0 126.4,182.8 126.7,182.8Z" data-region="baden-württemberg"/><path d="M167.5,193.5 167.4,193.3 167.3,193.3 167.3,193.2 167.3,192.9 167.4,192.8 167.3,192.5 167.3,192.3 167.1,192.2 167.0,192.1 167.0,191.9 167.1,191.7 167.2,191.7 167.2,191.6 167.2,191.4 167.2,191.2 167.2,191.2 167.3,190.9 167.2,190.8 167.1,190.6 166.9,190.2 166.8,190.1 166.5,190.0 166.4,189.9 166.3,189.8 166.1,189.7 166.1,189.5 166.0,189.5 165.9,189.6 165.8,189.6 165.7,189.6 165.4,189.7 165.4,189.8 165.2,189.8 165.0,189.8 164.7,189.9 164.6,190.0 164.5,190.0 164.4,189.9 164.1,189.9 163.8,189.7 163.8,189.8 163.7,189.9 163.6,189.9 163.6,190.0 163.4,190.0 163.4,190.1 163.2,190.2 163.1,190.1 163.1,189.9 163.0,189.7 162.9,189.8 162.8,189.7 162.4,189.7 162.3,189.6 162.2,189.7 162.2,189.7 162.1,189.6 162.1,189.4 162.0,189.2 161.8,189.4 161.7,189.5 161.5,189.4 161.5,189.4 161.4,189.6 161.3,189.6 161.2,189.8 161.1,189.9 161.0,190.0 160.8,189.9 160.8,190.0 160.8,190.1 160.7,190.3 160.5,190.4 160.4,190.4 160.3,190.6 160.3,190.5 160.1,190.7 160.0,190.7 159.9,190.8 159.8,190.8 159.7,190.9 159.5,190.8 159.3,190.6 159.4,190.5 159.5,190.5 159.6,190.3 159.6,190.3 159.7,190.1 159.8,190.0 159.8,189.8 159.9,189.6 160.0,189.4 160.1,189.3 160.0,189.1 159.9,189.0 160.0,188.9 160.3,188.6 160.3,188.6 160.4,188.7 160.6,188.7 160.6,188.6 160.5,188.5 160.4,188.3 160.3,188.3 160.2,188.3 160.1,188.0 159.9,188.0 159.8,187.8 159.7,187.7 159.8,187.6 159.8,187.5 159.5,187.3 159.6,187.1 159.4,187.1 159.3,187.2 159.1,187.3 159.1,187.2 158.9,187.2 158.8,187.4 158.7,187.4 158.7,187.3 158.5,187.2 158.3,187.3 158.2,187.2 158.2,187.2 158.1,187.1 158.1,186.9 158.1,186.8 158.1,186.6 158.0,186.3 158.0,186.2 157.9,186.1 157.9,185.9 157.9,185.8 157.9,185.8 158.1,185.4 158.0,185.2 158.1,185.2 158.2,185.2 158.3,185.3 158.5,185.4 158.8,185.4 158.9,185.4 158.9,185.3 158.9,185.1 159.1,185.0 159.1,184.8 159.1,184.7 159.0,184.6 159.1,184.5 159.0,184.2 158.8,184.2 158.7,184.2 158.7,184.1 158.7,184.0 158.7,183.8 158.8,183.4 158.9,183.3 159.0,183.3 159.0,183.2 159.1,183.1 159.1,183.0 159.2,182.8 159.3,182.9 159.7,182.8 159.7,182.8 159.8,182.7 159.9,182.7 160.0,182.8 160.2,182.9 160.4,182.9 160.6,183.0 160.7,183.0 160.7,183.0 160.8,183.1 161.0,183.3 161.0,183.6 161.0,183.8 161.1,183.8 161.3,183.8 161.4,183.7 161.5,183.7 161.6,183.6 161.8,183.6 162.0,183.5 162.2,183.5 162.1,183.6 162.2,183.7 162.4,183.9 162.5,183.8 162.6,183.9 162.8,183.9 162.8,183.8 163.0,183.7 163.2,183.6 163.2,183.5 163.4,183.4 163.5,183.4 163.6,183.4 163.8,183.2 163.9,183.2 164.0,183.2 164.1,183.0 164.0,183.0 164.1,182.9 164.2,182.8 164.4,182.8 164.5,182.7 164.6,182.7 164.8,182.7 164.9,182.6 165.0,182.6 165.2,182.3 165.4,182.5 165.5,182.6 165.6,182.7 165.9,182.6 166.1,182.7 166.2,182.6 166.3,182.7 166.3,182.8 166.5,182.9 166.6,182.9 166.7,182.8 166.9,182.6 167.0,182.6 167.3,182.5 167.5,182.6 167.7,182.6 168.0,182.5 168.0,182.4 168.1,182.4 168.2,182.5 168.3,182.4 168.4,182.5 168.5,182.4 168.4,182.1 168.5,182.0 168.6,182.0 168.7,182.1 169.0,182.1 169.0,181.9 169.0,181.8 169.2,181.8 169.3,181.7 169.3,181.7 169.5,181.8 169.7,181.9 169.7,182.0 169.8,182.1 169.9,182.1 170.0,182.3 170.1,182.3 170.2,182.3 170.4,182.3 170.4,182.4 170.4,182.5 170.6,182.5 171.0,182.5 171.2,182.8 171.3,182.8 171.4,182.9 171.5,183.0 171.6,182.9 171.7,182.9 171.7,183.0 171.8,183.4 171.8,183.5 171.9,183.6 171.9,183.7 172.1,183.6 172.3,183.6 172.4,183.6 172.5,183.8 172.6,183.8 172.6,184.0 172.5,184.1 172.6,184.3 172.7,184.3 172.7,184.3 172.8,184.3 172.9,184.4 172.9,184.6 173.0,184.7 173.0,184.7 173.3,184.8 173.4,184.8 173.5,184.8 173.7,184.9 173.8,185.1 174.0,185.1 174.0,185.0 174.1,184.9 174.2,184.8 174.2,184.8 174.3,185.0 174.3,185.3 174.4,185.4 174.4,185.5 174.5,185.6 174.6,185.8 174.6,185.8 174.4,185.8 174.3,185.9 174.2,185.8 174.2,186.0 174.1,186.1 174.1,185.9 174.0,186.0 173.9,186.2 173.9,186.2 173.7,186.2 173.8,186.3 173.7,186.3 173.8,186.4 173.8,186.6 173.9,186.8 173.9,186.9 174.0,187.2 174.0,187.3 174.1,187.4 174.1,187.7 174.1,187.8 174.1,188.0 174.1,188.0 174.2,188.2 174.2,188.3 174.3,188.4 174.3,188.7 174.2,188.9 174.1,188.9 174.1,189.1 174.1,189.1 174.1,189.3 174.2,189.4 174.3,189.5 174.3,189.7 174.4,189.9 174.5,190.0 174.5,190.1 174.4,190.0 174.3,190.1 174.2,190.3 174.1,190.5 174.1,190.6 174.0,190.6 173.9,190.9 173.8,190.9 173.8,191.1 173.7,191.1 173.6,191.2 173.6,191.4 173.6,191.5 173.5,191.6 173.4,191.7 173.5,191.9 173.5,191.9 173.5,192.2 173.5,192.4 173.4,192.5 173.5,192.7 173.7,192.9 173.8,193.1 173.8,193.4 173.6,193.3 173.5,193.2 173.4,193.1 173.2,193.1 173.0,192.9 172.7,192.8 172.4,192.8 172.3,192.8 172.0,193.0 171.9,193.0 171.8,193.0 171.6,193.0 171.4,192.9 171.3,192.9 171.3,193.1 171.2,193.1 171.2,193.2 171.1,193.2 170.9,193.1 170.8,193.2 170.8,193.2 170.6,193.3 170.7,193.5 170.6,193.7 170.5,193.7 170.4,193.8 170.2,193.8 170.1,193.9 170.0,193.6 169.9,193.6 169.8,193.4 169.6,193.5 169.3,193.5 169.2,193.5 169.1,193.5 169.0,193.5 168.9,193.6 168.8,193.5 168.6,193.6 168.4,193.5 168.3,193.4 168.2,193.5 168.0,193.4 167.9,193.5 167.8,193.4 167.6,193.5 167.5,193.5Z" data-region="steiermark"/><path d="M152.4,192.6 152.4,192.9 152.3,193.0 152.3,193.3 152.3,193.4 152.1,193.4 151.9,193.5 151.9,193.4 151.7,193.4 151.5,193.4 151.5,193.5 151.4,193.4 151.1,193.2 150.9,193.2 150.9,193.1 150.7,193.1 150.6,193.0 150.3,192.8 150.1,192.2 149.8,192.1 149.7,192.2 149.6,192.1 149.7,192.0 149.6,191.8 149.8,191.7 149.7,191.4 149.7,191.3 149.6,191.3 149.6,191.2 149.3,191.1 149.2,191.3 149.1,191.1 149.0,190.9 148.8,190.9 148.8,190.8 148.9,190.6 148.8,190.5 148.7,190.4 148.7,190.2 148.6,189.9 148.8,189.7 148.9,189.8 149.1,189.7 149.2,189.5 149.2,189.4 149.4,189.3 149.5,189.3 149.6,189.1 149.8,189.1 149.8,189.0 150.0,188.9 150.1,188.8 150.2,188.6 150.4,188.5 150.5,188.6 150.6,188.5 150.7,188.6 150.8,188.5 150.9,188.4 151.2,188.5 151.2,188.6 151.4,188.7 151.5,188.6 151.6,188.7 151.8,188.8 151.9,188.9 152.0,189.0 152.3,189.3 152.4,189.5 152.5,189.6 152.7,189.5 152.7,189.7 152.6,189.8 152.5,190.1 152.6,190.2 152.6,190.3 152.6,190.4 152.7,190.4 152.8,190.5 152.9,190.6 152.9,190.7 153.0,190.8 153.1,190.8 153.2,190.9 153.2,191.0 153.2,191.1 153.2,191.2 153.2,191.4 153.5,191.6 153.6,191.7 153.6,191.8 153.7,191.8 153.9,191.9 154.0,192.0 154.0,192.1 154.0,192.2 153.9,192.3 153.8,192.4 153.7,192.3 153.6,192.2 153.5,192.4 153.3,192.4 153.2,192.5 153.0,192.4 152.9,192.4 152.6,192.5 152.6,192.6 152.5,192.6 152.4,192.6ZM139.0,191.3 138.6,191.6 138.5,191.6 138.5,191.5 138.3,191.5 138.2,191.5 138.1,191.5 138.0,191.4 138.0,191.3 138.0,191.1 138.0,191.0 138.0,190.9 138.1,190.8 138.1,190.6 137.9,190.5 137.7,190.4 137.7,190.2 137.5,190.0 137.4,190.1 137.2,190.1 137.1,190.4 137.1,190.5 137.0,190.5 136.9,190.6 137.0,190.7 136.9,190.8 136.7,190.7 136.5,190.7 136.5,190.8 136.4,191.0 136.5,191.1 136.5,191.3 136.2,191.3 136.1,191.5 135.9,191.5 135.9,191.2 135.7,191.1 135.7,191.0 135.7,190.9 135.6,190.7 135.7,190.6 135.8,190.4 135.8,190.3 135.9,190.2 136.0,190.2 136.0,189.9 135.8,189.9 135.8,189.7 135.9,189.7 136.0,189.5 135.9,189.4 135.8,189.4 135.8,189.2 135.9,189.0 136.2,188.7 136.3,188.7 136.3,188.6 136.4,188.5 136.3,188.4 136.3,188.3 136.3,188.2 136.2,188.0 136.3,188.0 136.3,187.7 136.2,187.6 136.4,187.5 136.2,187.4 136.1,187.3 136.3,187.2 136.4,187.2 136.5,187.3 136.7,187.1 136.8,187.1 137.0,186.9 137.1,186.9 137.2,186.8 137.3,186.6 137.5,186.4 137.5,186.3 137.5,186.2 137.7,186.1 137.8,186.2 137.7,186.1 137.8,185.9 137.9,185.8 137.9,185.7 138.0,185.7 138.0,185.5 138.0,185.3 137.9,185.2 137.8,185.1 137.8,185.0 137.7,185.0 137.8,184.9 137.8,184.8 137.9,184.4 138.0,184.5 138.1,184.6 138.2,184.6 138.3,184.6 138.6,184.6 138.7,184.7 138.8,184.3 138.9,184.3 139.0,184.4 139.3,184.4 139.4,184.4 139.4,184.5 139.6,184.6 139.7,184.6 139.8,184.6 139.9,184.8 140.0,184.9 140.2,184.7 140.4,184.7 140.5,184.7 140.7,184.6 140.8,184.8 140.6,185.0 140.6,185.2 140.7,185.2 140.8,185.1 141.0,185.2 141.0,185.3 141.1,185.4 141.3,185.7 141.2,185.8 141.2,186.0 141.3,186.0 141.5,186.0 141.8,186.0 142.0,186.0 142.2,186.0 142.2,185.9 142.4,185.8 142.7,185.7 142.8,185.7 143.0,185.7 142.8,186.0 143.1,186.0 143.3,185.9 143.3,185.7 143.4,185.7 143.6,185.5 143.8,185.5 144.1,185.5 144.0,185.3 143.9,185.3 143.9,185.2 144.0,185.1 144.1,185.0 144.2,184.8 144.3,184.9 144.5,184.9 144.7,184.9 145.1,184.8 145.2,184.7 145.2,184.4 145.3,184.3 145.3,184.2 145.4,184.2 145.5,184.1 145.6,184.2 145.8,184.2 145.9,184.1 146.2,184.1 146.4,184.1 146.7,184.2 146.8,184.2 146.9,184.0 147.1,183.9 147.3,183.9 147.4,183.9 147.9,183.8 147.9,183.9 148.1,183.8 148.2,183.8 148.4,183.9 148.6,183.9 148.7,183.9 148.8,183.9 149.0,183.8 149.0,184.0 149.1,183.9 149.2,183.9 149.1,183.6 149.0,183.4 149.0,183.3 148.9,183.2 148.9,183.0 149.0,183.0 149.3,182.8 149.4,182.6 149.5,182.7 149.4,182.9 149.4,183.1 149.5,183.2 149.6,183.1 149.9,183.0 150.0,183.1 150.1,183.1 150.2,183.2 150.4,183.1 150.7,183.0 150.7,183.3 150.8,183.5 151.0,183.6 151.0,183.7 151.2,183.7 151.3,183.6 151.5,183.7 151.5,183.8 151.5,183.9 151.9,184.1 152.0,184.1 152.1,184.2 152.0,184.3 151.9,184.4 151.9,184.5 152.0,184.6 152.1,184.9 152.2,185.1 152.3,185.2 152.1,185.3 152.0,185.3 151.9,185.3 151.9,185.6 151.9,185.7 151.8,185.8 151.7,185.9 151.5,186.1 151.4,186.0 151.3,186.0 151.2,186.1 151.1,186.1 151.0,186.2 150.9,186.2 150.9,186.3 151.0,186.5 151.0,186.6 150.9,186.7 150.8,186.8 150.7,186.7 150.5,186.8 150.5,186.9 150.3,186.8 150.2,186.9 150.1,186.8 150.0,186.7 149.7,186.7 149.5,187.0 149.5,186.9 149.3,187.0 149.3,186.9 149.2,186.9 149.2,187.0 148.9,187.0 148.7,187.1 148.6,186.9 148.4,187.1 148.3,187.2 148.3,187.3 148.5,187.4 148.5,187.6 148.4,188.0 148.4,188.4 148.4,188.5 148.5,188.6 148.6,188.7 148.6,188.9 148.6,189.1 148.7,189.2 148.6,189.3 148.5,189.2 148.4,189.3 148.3,189.4 148.1,189.4 148.0,189.5 147.7,189.5 147.6,189.6 147.5,189.6 147.5,189.7 147.4,189.6 147.3,189.7 147.0,189.9 146.8,190.0 146.8,190.1 146.6,190.1 146.4,190.1 146.3,190.3 146.2,190.3 146.1,190.3 146.0,190.1 145.8,190.0 145.7,190.1 145.5,190.0 145.4,189.9 145.2,189.9 145.1,190.0 144.9,190.2 144.7,189.9 144.5,189.9 144.4,190.0 144.3,190.1 144.2,190.2 144.2,190.3 144.1,190.3 144.0,190.3 143.9,190.3 143.7,190.1 143.6,190.1 143.5,190.1 143.3,190.2 143.3,190.1 143.0,190.3 142.9,190.3 142.6,190.3 142.5,190.4 142.5,190.3 142.4,190.5 142.4,190.7 142.3,190.7 142.1,190.7 142.1,190.8 142.0,190.9 142.0,191.1 142.0,191.2 141.9,191.4 141.9,191.8 141.8,191.9 141.7,191.9 141.6,192.1 141.5,192.3 141.4,192.3 141.1,192.2 140.9,192.2 140.7,192.3 140.6,192.4 140.6,192.3 140.4,192.2 140.3,192.3 140.2,192.2 140.1,192.1 140.0,192.1 139.8,192.1 139.7,192.1 139.6,192.0 139.8,191.9 139.9,191.8 139.8,191.7 139.6,191.6 139.6,191.5 139.4,191.5 139.4,191.3 139.3,191.2 139.2,191.3 139.0,191.3ZM137.9,184.4 137.8,184.3 137.8,184.2 137.9,184.2 138.0,184.1 138.0,184.3 137.9,184.4Z" data-region="tirol"/><path d="M135.8,189.7 135.8,189.9 136.0,189.9 136.0,190.2 135.9,190.2 135.8,190.3 135.8,190.4 135.7,190.6 135.6,190.7 135.7,190.9 135.7,191.0 135.7,191.1 135.9,191.2 135.9,191.5 135.8,191.5 135.6,191.6 135.5,191.4 135.4,191.4 135.3,191.2 135.1,191.0 135.0,191.0 134.9,190.9 134.8,190.8 134.6,190.9 134.5,190.8 134.4,190.7 134.2,190.6 134.2,190.4 134.2,190.3 134.3,190.1 134.3,190.0 134.2,189.9 134.2,189.8 134.1,189.8 134.0,189.8 133.9,189.8 133.8,189.8 133.6,189.7 133.6,189.6 133.3,189.6 133.1,189.5 133.0,189.5 132.9,189.4 132.7,189.4 132.6,189.5 132.5,189.5 132.4,189.4 132.5,189.2 132.6,189.2 132.6,189.0 132.5,188.9 132.6,188.8 132.5,188.5 132.4,188.5 132.4,188.4 132.2,188.2 132.2,188.1 132.3,187.9 132.2,187.8 132.1,187.7 132.2,187.6 132.1,187.5 132.0,187.4 132.0,187.3 132.1,187.2 132.1,187.0 132.3,186.8 132.4,186.6 132.4,186.5 132.5,186.4 132.7,186.3 132.8,186.3 132.9,186.2 132.9,186.1 132.8,186.0 132.7,185.9 132.7,185.6 132.8,185.5 132.5,185.4 132.4,185.3 132.3,185.2 132.2,185.0 132.2,184.9 132.3,184.9 132.5,184.9 132.7,184.8 132.8,184.8 133.2,184.7 133.3,184.5 133.4,184.3 133.4,184.2 133.5,184.1 133.7,184.0 133.8,184.1 133.8,184.4 133.8,184.5 133.9,184.5 134.0,184.6 134.2,184.7 134.2,184.5 134.3,184.6 134.5,184.7 134.6,184.6 134.7,184.7 134.7,184.8 134.8,184.9 135.0,185.2 135.2,185.1 135.4,185.4 135.5,185.4 135.6,185.6 135.6,185.7 135.6,185.8 135.4,185.8 135.4,185.9 135.5,186.1 135.6,186.4 135.7,186.2 135.9,186.3 136.1,186.3 136.1,186.1 136.2,186.1 136.3,186.2 136.4,186.1 136.5,186.3 136.3,186.6 136.2,186.7 136.4,186.9 136.3,187.0 136.1,187.0 136.1,187.2 136.1,187.3 136.2,187.4 136.4,187.5 136.2,187.6 136.3,187.7 136.3,188.0 136.2,188.0 136.3,188.2 136.3,188.3 136.3,188.4 136.4,188.5 136.3,188.6 136.3,188.7 136.2,188.7 135.9,189.0 135.8,189.2 135.8,189.4 135.9,189.4 136.0,189.5 135.9,189.7 135.8,189.7Z" data-region="vorarlberg"/></g>
+        <g class="coverage-markers" id="coverageMarkers"></g>
+        <g id="coverageMe"></g>
+      </svg>
+              <span class="map-open">&#8599; Ganze Karte</span>
+            </div>
+          </a>
+          <div class="map-cap"><span><span class="sw sw-rail"></span> L&auml;nder mit Zug-Anbindung</span><span><span class="sw sw-city"></span> &Ouml;ffi-St&auml;dte wie Wien</span></div>
+        </div>
+        <div class="desc">
+          <h3>Was wird unterst&uuml;tzt?</h3>
+          <div class="lead">&#9210; Abdeckung / Coverage</div>
+          <div class="point">
+            <div class="pmark area" style="background:var(--rail)"></div>
+            <div class="ptext">
+              <h4>Z&uuml;ge in fast ganz Europa</h4>
+              <p>Die <b>dunkelgelben L&auml;nder</b> haben Zug-Anbindung &mdash; wir decken Bahn &amp; Fernverkehr in den meisten L&auml;ndern ab: &Ouml;BB, DB, Westbahn und viele mehr.</p>
+            </div>
+          </div>
+          <div class="point">
+            <div class="pmark" style="background:var(--red)"></div>
+            <div class="ptext">
+              <h4>&Ouml;ffi-St&auml;dte wie Wien</h4>
+              <p>Jeder <b>rote Punkt</b> ist eine &Ouml;ffi-Stadt wie Wien: dort zeigt dein Straba die kompletten lokalen &Ouml;ffis &mdash; U-Bahn, Tram, Bus &amp; S-Bahn.</p>
+            </div>
+          </div>
+          <a class="foot" href="https://catch.it/cities" target="_blank" rel="noopener">&#9656; Ganze interaktive Karte ansehen &mdash; alle unterst&uuml;tzten Orte live auf <span class="lnk">catch.it/cities</span> &#8599;</a>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn" onclick="go(2)">&larr; Zur&uuml;ck</button>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" onclick="enterInstall()">Update &rarr;</button>
+      </div>
+    </section>
+
+    <!-- ===== INSTALL-WIZARD (PHASE B) ===== -->
+
+    <!-- B0: Chrome n&ouml;tig (nur bei inkompatiblem Browser) -->
+    <section class="wslide" id="iChrome">
+      <div class="chrome-block">
+        <div class="cb-icon">&#9888;&#65039;</div>
+        <h2>Bitte in <span class="accent">Chrome</span> &ouml;ffnen</h2>
+        <p>Das Update l&auml;uft direkt im Browser &uuml;ber <b>Web Serial</b> &mdash; das gibt es nur in <b>Chrome</b>, <b>Edge</b> oder <b>Opera</b> am Computer.</p>
+        <div class="cb-hint">&#9656; &Ouml;ffne <b>update.straba.at</b> in einem dieser Browser und starte erneut.</div>
+      </div>
+      <div class="nav-row">
+        <button class="btn" onclick="go(3)">&larr; Zur&uuml;ck</button>
+      </div>
+    </section>
+
+    <!-- B1: USB-A anschlie&szlig;en (Kabel-Weg) -->
+    <section class="wslide" id="iUSB">
+      <div class="slide-head">
+        <h2>Straba <span class="accent">anschlie&szlig;en</span></h2>
+        <div class="sub">Schritt 1 &middot; Kabel verbinden</div>
+      </div>
+
+      <div class="ticket">
+        <div class="big">&#127903;</div>
+        <div>
+          <h3>Du hast ein &auml;lteres Straba</h3>
+          <p>Hast du dein Straba <b>vor dem 31.12.</b> erhalten? Dann ist dieses Update genau f&uuml;r dich &mdash; deine Einstellungen bleiben erhalten.</p>
         </div>
       </div>
 
-      <div class="right-column">
-        <h3>📋 So geht's:</h3>
-        <div class="steps">
-          <div class="step">
-            <div class="step-number">1</div>
-            <div class="step-content">
-              <p>Straba mit einem <strong>USB-A auf USB-C Kabel</strong> an den Computer anschließen</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">2</div>
-            <div class="step-content">
-              <p>Auf <strong>"Update installieren"</strong> klicken</p>
-              <p class="note">Es öffnet sich ein Popup (auf Englisch)</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">3</div>
-            <div class="step-content">
-              <p>Den <strong>"Straba" USB-Port</strong> wählen (oft genannt J-Tag)</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">4</div>
-            <div class="step-content">
-              <p><strong>"Install Version 1.1"</strong> auswählen</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">5</div>
-            <div class="step-content">
-              <p>Bei manchen Browsern kommt <strong>"Erase device"</strong> – einfach auf <strong>Next</strong> klicken (nicht ankreuzen!)</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">6</div>
-            <div class="step-content">
-              <p>Bei <strong>"Confirm Installation"</strong> auf <strong>Install</strong> klicken</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-number">7</div>
-            <div class="step-content">
-              <p>Warten bis fertig – Straba startet automatisch neu 🎉</p>
-            </div>
-          </div>
+      <div class="usb-grid">
+        <div class="photo-frame">
+          <img class="sb-photo" src="USB-A.jpg" alt="Straba per USB-A am Laptop anschlie&szlig;en">
+          <div class="sb-bannercap" style="position:static; background:none; color:var(--ink); padding:8px 3px 2px"><span>USB-A &#8594; USB-C</span><span class="sbblue">am Laptop</span></div>
+        </div>
+        <div class="usb-text">
+          <div class="sb-kicker">Verbindung / Connection</div>
+          <h3 style="font-size:1.25em; margin-bottom:10px">Mit dem Laptop verbinden</h3>
+          <p style="color:#5b5446; line-height:1.6">Schlie&szlig; dein Straba mit einem <b>USB-A auf USB-C Kabel</b> direkt an deinen Laptop an.</p>
+          <p style="color:#5b5446; line-height:1.6; margin-top:10px; font-size:.92em">Tipp: Wird nichts erkannt, das Kabel einmal aus- und wieder einstecken.</p>
         </div>
       </div>
-    </div>
+
+      <div class="nav-row">
+        <button class="btn" onclick="go(3)">&larr; Zur&uuml;ck</button>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" onclick="showInstall(2)">Weiter &rarr;</button>
+      </div>
+    </section>
+
+    <!-- B2: Verbindung &amp; Installation -->
+    <section class="wslide" id="iInstall">
+      <div class="slide-head">
+        <h2>Verbindung &amp; <span class="accent">Installation</span></h2>
+        <div class="sub">Schritt 2 &middot; Update starten</div>
+      </div>
+
+      <div class="install-wrap">
+        <div class="install-col">
+          <div class="install-pad">
+            <esp-web-install-button manifest="manifest.json">
+              <button class="install-button" slot="activate">Update installieren</button>
+              <span slot="unsupported">
+                <div class="tips">&#9888; Dieser Browser unterst&uuml;tzt Web Serial nicht. Bitte <b>Chrome</b>, <b>Edge</b> oder <b>Opera</b> verwenden.</div>
+              </span>
+            </esp-web-install-button>
+          </div>
+          <div class="popnote">&#9432; Nach dem Klick &ouml;ffnet sich ein <b>englisches Fenster in der Bildschirmmitte</b> &mdash; darin wird die Verbindung hergestellt.</div>
+        </div>
+
+        <div class="desc">
+          <h3>Im Pop-up &mdash; die letzten Schritte</h3>
+          <div class="lead">&#9210; Englisches Fenster (Mitte)</div>
+          <div class="point"><div class="pnum">1</div><div class="ptext"><p>Den Port <b>&bdquo;Straba&ldquo;</b> w&auml;hlen (oft <b>JTAG</b>) &#8594; <b>Connect</b>.</p></div></div>
+          <div class="point"><div class="pnum">2</div><div class="ptext"><p><b>Install Version 2.0</b> ausw&auml;hlen.</p></div></div>
+          <div class="point"><div class="pnum">3</div><div class="ptext"><p>Falls <b>&bdquo;Erase device&ldquo;</b> erscheint: nur auf <b>Next</b> (nicht ankreuzen!).</p></div></div>
+          <div class="point"><div class="pnum">4</div><div class="ptext"><p><b>Confirm</b> &#8594; <b>Install</b> &mdash; kurz warten, dann startet dein catch it neu &#127881;.</p></div></div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn" onclick="showInstall(1)">&larr; Zur&uuml;ck</button>
+      </div>
+    </section>
+
+    <div class="dots" id="dots"></div>
 
     <div class="footer">
-      <span>Funktioniert mit Chrome, Edge und Opera</span>
-      <span>Version 1.1</span>
+      <span>Chrome &middot; Edge &middot; Opera</span>
+      <span>catch it &middot; v2.0</span>
     </div>
   </div>
+
+  <script>
+    var CITIES = [{"n": "Wien", "cc": "at", "x": 175.9, "y": 177.9, "lat": 48.21, "lon": 16.37, "ops": ["Wiener Linien", "Badner Bahn", "ÖBB"], "modes": ["U-Bahn", "Tram", "Bus", "S-Bahn", "Lokalbahn"]}, {"n": "Linz", "cc": "at", "x": 162.6, "y": 177.0, "lat": 48.3, "lon": 14.29, "ops": ["Linz AG Linien", "ÖBB"], "modes": ["Tram", "Bus", "S-Bahn"]}, {"n": "Salzburg", "cc": "at", "x": 154.5, "y": 182.0, "lat": 47.8, "lon": 13.04, "ops": ["Salzburg Verkehr", "ÖBB"], "modes": ["Obus", "Bus", "S-Bahn"]}, {"n": "Berlin", "cc": "de", "x": 156.8, "y": 134.8, "lat": 52.52, "lon": 13.4, "ops": ["BVG", "S-Bahn Berlin", "DB"], "modes": ["U-Bahn", "S-Bahn", "Tram", "Bus"]}, {"n": "Köln", "cc": "de", "x": 115.4, "y": 150.6, "lat": 50.94, "lon": 6.96, "ops": ["KVB", "DB"], "modes": ["Stadtbahn", "Bus", "S-Bahn"]}, {"n": "Aachen", "cc": "de", "x": 109.8, "y": 152.2, "lat": 50.78, "lon": 6.08, "ops": ["ASEAG", "DB"], "modes": ["Bus", "Zug"]}, {"n": "Paris", "cc": "fr", "x": 85.8, "y": 171.4, "lat": 48.86, "lon": 2.35, "ops": ["RATP", "SNCF"], "modes": ["Métro", "RER", "Tram", "Bus"]}, {"n": "Amsterdam", "cc": "nl", "x": 102.2, "y": 136.3, "lat": 52.37, "lon": 4.9, "ops": ["GVB", "NS"], "modes": ["Metro", "Tram", "Bus"]},{"n": "Prag", "cc": "cz", "x": 163.5, "y": 159.2, "lat": 50.08, "lon": 14.44, "ops": ["PID", "DPP"], "modes": ["Metro", "Tram", "Bus"]}, {"n": "Budapest", "cc": "hu", "x": 193.1, "y": 185.0, "lat": 47.5, "lon": 19.04, "ops": ["BKK"], "modes": ["Metro", "Tram", "Bus"]}, {"n": "London", "cc": "gb", "x": 69.9, "y": 144.9, "lat": 51.51, "lon": -0.13, "ops": ["TfL", "National Rail"], "modes": ["Tube", "Overground", "DLR", "Bus"]}, {"n": "Ljubljana", "cc": "si", "x": 164.0, "y": 199.4, "lat": 46.06, "lon": 14.51, "ops": ["LPP"], "modes": ["Bus"]}, {"n": "Helsinki", "cc": "fi", "x": 231.0, "y": 58.3, "lat": 60.17, "lon": 24.94, "ops": ["HSL", "VR"], "modes": ["Metro", "Tram", "Bus", "Nahverkehrszug"]}, {"n": "Madrid", "cc": "es", "x": 46.9, "y": 255.8, "lat": 40.42, "lon": -3.7, "ops": ["EMT", "Metro Madrid"], "modes": ["Metro", "Bus", "Cercanías"]}];
+
+    (function(){
+      var NS="http://www.w3.org/2000/svg";
+      var mg=document.getElementById("coverageMarkers"); if(!mg) return;
+      CITIES.forEach(function(c){
+        var g=document.createElementNS(NS,"g");
+        var isWien=c.n==="Wien";
+        g.setAttribute("class","cov-marker"+(isWien?" cov-marker--wien":""));
+        g.setAttribute("data-n",c.n);
+        if(isWien){
+          var ring=document.createElementNS(NS,"circle");
+          ring.setAttribute("class","cov-ring");
+          ring.setAttribute("cx",c.x); ring.setAttribute("cy",c.y); ring.setAttribute("r",3.2);
+          g.appendChild(ring);
+        }
+        var ci=document.createElementNS(NS,"circle");
+        ci.setAttribute("cx",c.x); ci.setAttribute("cy",c.y); ci.setAttribute("r",isWien?3.6:2.5);
+        g.appendChild(ci); mg.appendChild(g);
+      });
+    })();
+
+    var mapAnimated=false;
+    function animateMap(){
+      if(mapAnimated) return; mapAnimated=true;
+      var markers=Array.prototype.slice.call(document.querySelectorAll(".cov-marker"));
+      markers.sort(function(a,b){return (a.classList.contains("cov-marker--wien")?-1:0)-(b.classList.contains("cov-marker--wien")?-1:0);});
+      markers.forEach(function(m,i){ setTimeout(function(){
+        m.classList.add("show");
+        var r=m.querySelector(".cov-ring"); if(r) r.classList.add("show");
+      }, 250+i*110); });
+    }
+
+    // Splitflap-Boards der aktiven Slide neu "umklappen"
+    function runBoards(slide){
+      slide.querySelectorAll("[data-board]").forEach(function(b){
+        b.classList.remove("run"); void b.offsetWidth; b.classList.add("run");
+      });
+    }
+
+    // Alle Slides (Phase A: Info, Phase B: Installer)
+    var SLIDES=["w1","w2","w3","iChrome","iUSB","iInstall"];
+    function showSlide(id){
+      var active=null;
+      SLIDES.forEach(function(s){
+        var el=document.getElementById(s); if(!el) return;
+        var on=(s===id); el.classList.toggle("active",on); if(on) active=el;
+      });
+      if(active){ runBoards(active); window.scrollTo({top:0,behavior:"smooth"}); }
+      return active;
+    }
+    function renderDots(total,active){
+      var d=document.getElementById("dots");
+      if(!total){ d.innerHTML=""; return; }
+      var h="";
+      for(var i=1;i<=total;i++){ h+='<span class="dot'+(i===active?" on":"")+'"></span>'; }
+      d.innerHTML=h;
+    }
+
+    // Phase A — Info-Wizard (3 Punkte)
+    function go(n){
+      showSlide("w"+n);
+      renderDots(3,n);
+      if(n===3) animateMap();
+    }
+
+    // Phase B — Installer-Wizard (Kabel-Weg, Punkte z&auml;hlen neu ab 1).
+    // Tool geht nur an Ger&auml;te vor dem 31.12. -> direkt Kabel-Update.
+    function enterInstall(){
+      if("serial" in navigator){ showInstall(1); }
+      else { showSlide("iChrome"); renderDots(0); }
+    }
+    function showInstall(n){
+      showSlide(n===1?"iUSB":"iInstall");
+      renderDots(2,n);
+    }
+
+    window.addEventListener("load", function(){ go(1); });
+  </script>
 </body>
 </html>
