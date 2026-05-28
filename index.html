@@ -199,6 +199,39 @@
       background:var(--card); flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center;
       font-family:'Space Mono',monospace; font-weight:700; font-size:.8rem}
 
+    /* help button + support modal */
+    .help-btn{margin-top:16px; font-family:'Space Mono',monospace; font-weight:700; font-size:.74rem;
+      text-transform:uppercase; letter-spacing:.5px; cursor:pointer; color:var(--red); background:#fff;
+      border:2.5px solid var(--ink); border-radius:5px; box-shadow:3px 3px 0 var(--ink); padding:9px 14px;
+      opacity:0; visibility:hidden; transform:translateY(6px);
+      transition:transform .35s ease, box-shadow .07s ease, opacity .45s ease}
+    .help-btn.show{opacity:1; visibility:visible; transform:translateY(0)}
+    .help-btn:hover{transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--ink)}
+    .help-btn:active{transform:translate(3px,3px); box-shadow:0 0 0 var(--ink)}
+    .modal-overlay{position:fixed; inset:0; background:rgba(27,27,27,.6); display:none;
+      align-items:center; justify-content:center; padding:20px; z-index:1000}
+    .modal-overlay.open{display:flex; animation:fade .25s ease}
+    .modal{position:relative; background:var(--card); border:3px solid var(--ink); border-radius:10px;
+      box-shadow:10px 10px 0 var(--ink); max-width:520px; width:100%; max-height:92vh; overflow:auto;
+      padding:28px 28px 22px}
+    .modal-x{position:absolute; top:12px; right:14px; background:none; border:none; cursor:pointer;
+      font-size:1.7rem; line-height:1; color:var(--ink)}
+    .modal h3{font-size:1.45em; margin-bottom:4px}
+    .modal .modal-lead{color:#5b5446; font-size:.98em; margin-bottom:16px}
+    .modal-tip{font-family:'Space Mono',monospace; font-size:.8rem; line-height:1.5; background:#fff4d6;
+      border:3px solid var(--ink); border-left-width:8px; border-left-color:var(--amber); border-radius:5px;
+      padding:11px 13px; margin-bottom:14px}
+    .modal-text{color:#5b5446; font-size:.92em; line-height:1.55; margin-bottom:16px}
+    .modal .field{margin-bottom:12px}
+    .modal label{display:block; font-family:'Space Mono',monospace; text-transform:uppercase;
+      letter-spacing:1px; font-size:.62rem; color:#5b5446; margin-bottom:5px}
+    .modal input, .modal textarea{width:100%; font-family:'Space Grotesk',sans-serif; font-size:.95rem;
+      color:var(--ink); background:#fff; border:2.5px solid var(--ink); border-radius:5px; padding:10px 12px}
+    .modal input:focus, .modal textarea:focus{outline:none; box-shadow:3px 3px 0 var(--ink)}
+    .modal textarea{resize:vertical}
+    .modal-foot{margin-top:12px; text-align:center; font-family:'Space Mono',monospace; font-size:.7rem;
+      letter-spacing:.5px; color:#5b5446}
+
     /* dots */
     .dots{display:flex; justify-content:center; gap:9px; margin-top:28px}
     .dot{width:11px; height:11px; border:2.5px solid var(--ink); background:var(--card); transition:all .25s}
@@ -407,6 +440,7 @@
           <h3 style="font-size:1.25em; margin-bottom:10px">Mit dem Laptop verbinden</h3>
           <p style="color:#5b5446; line-height:1.6">Schlie&szlig; dein catch.it mit einem <b>USB-A auf USB-C Kabel</b> direkt an deinen Laptop an.</p>
           <p style="color:#5b5446; line-height:1.6; margin-top:10px; font-size:.92em">Tipp: Wird nichts erkannt, das Kabel einmal aus- und wieder einstecken.</p>
+          <button type="button" class="help-btn" onclick="openSupport()">&#9888;&#65039; Keine Verbindung m&ouml;glich?</button>
         </div>
       </div>
 
@@ -460,6 +494,28 @@
     </div>
   </div>
 
+  <!-- Support-Popup: keine Verbindung m&ouml;glich -->
+  <div class="modal-overlay" id="supportModal" onclick="if(event.target===this)closeSupport()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="supportTitle">
+      <button class="modal-x" type="button" onclick="closeSupport()" aria-label="Schlie&szlig;en">&times;</button>
+      <h3 id="supportTitle">Keine Verbindung m&ouml;glich?</h3>
+      <p class="modal-lead">Kein Stress &mdash; das l&ouml;sen wir.</p>
+
+      <div class="modal-tip"><b>Zuerst:</b> Zieh das Kabel einmal ab und steck es wieder ein &mdash; am besten direkt am Laptop, ohne USB-Hub.</div>
+
+      <p class="modal-text">Findet dein Computer trotzdem nichts? Bei wenigen Ger&auml;ten ist das Kabel ab Werk falsch verdrahtet &mdash; das ist kein Problem. Schreib uns kurz, wir k&uuml;mmern uns sofort drum.</p>
+
+      <form id="supportForm" onsubmit="return sendSupport(event)">
+        <div class="field"><label for="sfName">Name</label><input id="sfName" name="name" required></div>
+        <div class="field"><label for="sfOrder">Bestellnummer</label><input id="sfOrder" name="order" placeholder="z. B. #1234" required></div>
+        <div class="field"><label for="sfMail">E-Mail</label><input id="sfMail" name="email" type="email" placeholder="du@beispiel.at" required></div>
+        <div class="field"><label for="sfMsg">Nachricht (optional)</label><textarea id="sfMsg" name="msg" rows="2" placeholder="z. B. Computer erkennt nichts"></textarea></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:4px">An Support senden &rarr;</button>
+      </form>
+      <p class="modal-foot">Geht an <b>support@straba.at</b></p>
+    </div>
+  </div>
+
   <script>
     var CITIES = [{"n": "Wien", "cc": "at", "x": 175.9, "y": 177.9, "lat": 48.21, "lon": 16.37, "ops": ["Wiener Linien", "Badner Bahn", "ÖBB"], "modes": ["U-Bahn", "Tram", "Bus", "S-Bahn", "Lokalbahn"]}, {"n": "Linz", "cc": "at", "x": 162.6, "y": 177.0, "lat": 48.3, "lon": 14.29, "ops": ["Linz AG Linien", "ÖBB"], "modes": ["Tram", "Bus", "S-Bahn"]}, {"n": "Salzburg", "cc": "at", "x": 154.5, "y": 182.0, "lat": 47.8, "lon": 13.04, "ops": ["Salzburg Verkehr", "ÖBB"], "modes": ["Obus", "Bus", "S-Bahn"]}, {"n": "Berlin", "cc": "de", "x": 156.8, "y": 134.8, "lat": 52.52, "lon": 13.4, "ops": ["BVG", "S-Bahn Berlin", "DB"], "modes": ["U-Bahn", "S-Bahn", "Tram", "Bus"]}, {"n": "Köln", "cc": "de", "x": 115.4, "y": 150.6, "lat": 50.94, "lon": 6.96, "ops": ["KVB", "DB"], "modes": ["Stadtbahn", "Bus", "S-Bahn"]}, {"n": "Aachen", "cc": "de", "x": 109.8, "y": 152.2, "lat": 50.78, "lon": 6.08, "ops": ["ASEAG", "DB"], "modes": ["Bus", "Zug"]}, {"n": "Paris", "cc": "fr", "x": 85.8, "y": 171.4, "lat": 48.86, "lon": 2.35, "ops": ["RATP", "SNCF"], "modes": ["Métro", "RER", "Tram", "Bus"]}, {"n": "Amsterdam", "cc": "nl", "x": 102.2, "y": 136.3, "lat": 52.37, "lon": 4.9, "ops": ["GVB", "NS"], "modes": ["Metro", "Tram", "Bus"]},{"n": "Prag", "cc": "cz", "x": 163.5, "y": 159.2, "lat": 50.08, "lon": 14.44, "ops": ["PID", "DPP"], "modes": ["Metro", "Tram", "Bus"]}, {"n": "Budapest", "cc": "hu", "x": 193.1, "y": 185.0, "lat": 47.5, "lon": 19.04, "ops": ["BKK"], "modes": ["Metro", "Tram", "Bus"]}, {"n": "London", "cc": "gb", "x": 69.9, "y": 144.9, "lat": 51.51, "lon": -0.13, "ops": ["TfL", "National Rail"], "modes": ["Tube", "Overground", "DLR", "Bus"]}, {"n": "Ljubljana", "cc": "si", "x": 164.0, "y": 199.4, "lat": 46.06, "lon": 14.51, "ops": ["LPP"], "modes": ["Bus"]}, {"n": "Helsinki", "cc": "fi", "x": 231.0, "y": 58.3, "lat": 60.17, "lon": 24.94, "ops": ["HSL", "VR"], "modes": ["Metro", "Tram", "Bus", "Nahverkehrszug"]}, {"n": "Madrid", "cc": "es", "x": 46.9, "y": 255.8, "lat": 40.42, "lon": -3.7, "ops": ["EMT", "Metro Madrid"], "modes": ["Metro", "Bus", "Cercanías"]}];
 
@@ -503,12 +559,20 @@
 
     // Alle Slides (Phase A: Info, Phase B: Installer)
     var SLIDES=["w1","w2","w3","iChrome","iUSB","iInstall"];
+    var helpTimer=null;
     function showSlide(id){
       var active=null;
       SLIDES.forEach(function(s){
         var el=document.getElementById(s); if(!el) return;
         var on=(s===id); el.classList.toggle("active",on); if(on) active=el;
       });
+      // "Keine Verbindung?"-Hilfe-Button erst ~10s nach dem USB-Schritt einblenden
+      var help=document.querySelector("#iUSB .help-btn");
+      if(help){
+        help.classList.remove("show");
+        clearTimeout(helpTimer);
+        if(id==="iUSB"){ helpTimer=setTimeout(function(){ help.classList.add("show"); }, 10000); }
+      }
       if(active){ runBoards(active); window.scrollTo({top:0,behavior:"smooth"}); }
       return active;
     }
@@ -537,6 +601,31 @@
       showSlide(n===1?"iUSB":"iInstall");
       renderDots(2,n);
     }
+
+    // Support-Popup (keine Verbindung) -> vorausgef&uuml;llte Mail an support@straba.at
+    function openSupport(){ document.getElementById("supportModal").classList.add("open"); }
+    function closeSupport(){ document.getElementById("supportModal").classList.remove("open"); }
+    function sendSupport(e){
+      e.preventDefault();
+      var f=e.target;
+      var name=(f.name.value||"").trim();
+      var order=(f.order.value||"").trim();
+      var email=(f.email.value||"").trim();
+      var msg=(f.msg.value||"").trim();
+      var subject="catch.it Update – keine Verbindung";
+      var body=
+        "Hallo Support-Team,\n\n"+
+        "ich kann mein catch.it nicht per Kabel updaten (Computer findet keine Verbindung).\n\n"+
+        "Name: "+name+"\n"+
+        "Bestellnummer: "+order+"\n"+
+        "E-Mail: "+email+"\n"+
+        (msg?("\nNachricht: "+msg+"\n"):"")+
+        "\nDanke!";
+      window.location.href="mailto:support@straba.at?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+      closeSupport();
+      return false;
+    }
+    document.addEventListener("keydown", function(ev){ if(ev.key==="Escape") closeSupport(); });
 
     window.addEventListener("load", function(){ go(1); });
   </script>
