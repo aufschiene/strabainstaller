@@ -462,7 +462,7 @@
         <div class="install-col">
           <div class="install-pad">
             <esp-web-install-button manifest="manifest.json">
-              <button class="install-button" slot="activate">Update installieren</button>
+              <button class="install-button" slot="activate" onclick="armSupportTimer()">Update installieren</button>
               <span slot="unsupported">
                 <div class="tips">&#9888; Dieser Browser unterst&uuml;tzt Web Serial nicht. Bitte <b>Chrome</b>, <b>Edge</b> oder <b>Opera</b> verwenden.</div>
               </span>
@@ -571,13 +571,10 @@
         var el=document.getElementById(s); if(!el) return;
         var on=(s===id); el.classList.toggle("active",on); if(on) active=el;
       });
-      // "Keine Verbindung?"-Hilfe-Button erst ~10s nach dem Installations-Schritt einblenden
+      // "Keine Verbindung?"-Hilfe-Button bei jedem Slide-Wechsel zur&uuml;cksetzen.
+      // Er erscheint NUR 7s nach Klick auf "Update installieren" (siehe armSupportTimer).
       var help=document.querySelector("#iInstall .help-btn");
-      if(help){
-        help.classList.remove("show");
-        clearTimeout(helpTimer);
-        if(id==="iInstall"){ helpTimer=setTimeout(function(){ help.classList.add("show"); }, 10000); }
-      }
+      if(help){ help.classList.remove("show"); clearTimeout(helpTimer); }
       if(active){ runBoards(active); window.scrollTo({top:0,behavior:"smooth"}); }
       return active;
     }
@@ -605,6 +602,14 @@
     function showInstall(n){
       showSlide(n===1?"iUSB":"iInstall");
       renderDots(2,n);
+    }
+
+    // "Keine Verbindung?"-Button 7s nach Klick auf "Update installieren" einblenden
+    function armSupportTimer(){
+      var help=document.querySelector("#iInstall .help-btn");
+      if(!help) return;
+      clearTimeout(helpTimer);
+      helpTimer=setTimeout(function(){ help.classList.add("show"); }, 7000);
     }
 
     // Support-Popup (keine Verbindung) -> vorausgef&uuml;llte Mail an support@straba.at
