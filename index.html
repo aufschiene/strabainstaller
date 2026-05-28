@@ -200,9 +200,10 @@
       font-family:'Space Mono',monospace; font-weight:700; font-size:.8rem}
 
     /* help button + support modal */
-    .help-btn{margin-top:16px; font-family:'Space Mono',monospace; font-weight:700; font-size:.74rem;
-      text-transform:uppercase; letter-spacing:.5px; cursor:pointer; color:var(--red); background:#fff;
-      border:2.5px solid var(--ink); border-radius:5px; box-shadow:3px 3px 0 var(--ink); padding:9px 14px;
+    .help-wrap{text-align:center; margin-top:18px}
+    .help-btn{font-family:'Space Mono',monospace; font-weight:700; font-size:.74rem;
+      text-transform:uppercase; letter-spacing:.5px; cursor:pointer; color:#fff; background:var(--red);
+      border:2.5px solid var(--ink); border-radius:5px; box-shadow:3px 3px 0 var(--ink); padding:10px 16px;
       opacity:0; visibility:hidden; transform:translateY(6px);
       transition:transform .35s ease, box-shadow .07s ease, opacity .45s ease}
     .help-btn.show{opacity:1; visibility:visible; transform:translateY(0)}
@@ -406,9 +407,9 @@
     <section class="wslide" id="iChrome">
       <div class="chrome-block">
         <div class="cb-icon">&#9888;&#65039;</div>
-        <h2>Bitte in <span class="accent">Chrome</span> &ouml;ffnen</h2>
-        <p>Das Update l&auml;uft direkt im Browser &uuml;ber <b>Web Serial</b> &mdash; das gibt es nur in <b>Chrome</b>, <b>Edge</b> oder <b>Opera</b> am Computer.</p>
-        <div class="cb-hint">&#9656; &Ouml;ffne <b>update.straba.at</b> in einem dieser Browser und starte erneut.</div>
+        <h2>Bitte <span class="accent">Chrome am Laptop</span> &ouml;ffnen</h2>
+        <p>Das Update l&auml;uft direkt im Browser &uuml;ber <b>Web Serial</b> &mdash; das geht nur am <b>Laptop/Computer</b> in <b>Chrome</b>, <b>Edge</b> oder <b>Opera</b> (nicht am Handy).</p>
+        <div class="cb-hint">&#9656; &Ouml;ffne <b>update.straba.at</b> am Laptop in einem dieser Browser und starte erneut.</div>
       </div>
       <div class="nav-row">
         <button class="btn" onclick="go(3)">&larr; Zur&uuml;ck</button>
@@ -440,7 +441,6 @@
           <h3 style="font-size:1.25em; margin-bottom:10px">Mit dem Laptop verbinden</h3>
           <p style="color:#5b5446; line-height:1.6">Schlie&szlig; dein catch.it mit einem <b>USB-A auf USB-C Kabel</b> direkt an deinen Laptop an.</p>
           <p style="color:#5b5446; line-height:1.6; margin-top:10px; font-size:.92em">Tipp: Wird nichts erkannt, das Kabel einmal aus- und wieder einstecken.</p>
-          <button type="button" class="help-btn" onclick="openSupport()">&#9888;&#65039; Keine Verbindung m&ouml;glich?</button>
         </div>
       </div>
 
@@ -471,13 +471,18 @@
           <div class="popnote">&#9432; Nach dem Klick &ouml;ffnet sich ein <b>englisches Fenster in der Bildschirmmitte</b> &mdash; darin wird die Verbindung hergestellt.</div>
         </div>
 
-        <div class="desc">
-          <h3>Im Pop-up &mdash; die letzten Schritte</h3>
-          <div class="lead">&#9210; Englisches Fenster (Mitte)</div>
-          <div class="point"><div class="pnum">1</div><div class="ptext"><p>Den Port deines <b>catch.it</b> w&auml;hlen (oft <b>&bdquo;JTAG/serial&ldquo;</b>) &#8594; <b>Connect</b>.</p></div></div>
-          <div class="point"><div class="pnum">2</div><div class="ptext"><p><b>Install Version 2.0</b> ausw&auml;hlen.</p></div></div>
-          <div class="point"><div class="pnum">3</div><div class="ptext"><p>Falls <b>&bdquo;Erase device&ldquo;</b> erscheint: nur auf <b>Next</b> (nicht ankreuzen!).</p></div></div>
-          <div class="point"><div class="pnum">4</div><div class="ptext"><p><b>Confirm</b> &#8594; <b>Install</b> &mdash; kurz warten, dann startet dein catch.it neu &#127881;.</p></div></div>
+        <div class="install-col-right">
+          <div class="desc">
+            <h3>Im Pop-up &mdash; die letzten Schritte</h3>
+            <div class="lead">&#9210; Englisches Fenster (Mitte)</div>
+            <div class="point"><div class="pnum">1</div><div class="ptext"><p>Den Port deines <b>catch.it</b> w&auml;hlen (oft <b>&bdquo;JTAG/serial&ldquo;</b>) &#8594; <b>Connect</b>.</p></div></div>
+            <div class="point"><div class="pnum">2</div><div class="ptext"><p><b>Install Version 2.0</b> ausw&auml;hlen.</p></div></div>
+            <div class="point"><div class="pnum">3</div><div class="ptext"><p>Falls <b>&bdquo;Erase device&ldquo;</b> erscheint: nur auf <b>Next</b> (nicht ankreuzen!).</p></div></div>
+            <div class="point"><div class="pnum">4</div><div class="ptext"><p><b>Confirm</b> &#8594; <b>Install</b> &mdash; kurz warten, dann startet dein catch.it neu &#127881;.</p></div></div>
+          </div>
+          <div class="help-wrap">
+            <button type="button" class="help-btn" onclick="openSupport()">&#9888;&#65039; Keine Verbindung m&ouml;glich?</button>
+          </div>
         </div>
       </div>
 
@@ -566,12 +571,12 @@
         var el=document.getElementById(s); if(!el) return;
         var on=(s===id); el.classList.toggle("active",on); if(on) active=el;
       });
-      // "Keine Verbindung?"-Hilfe-Button erst ~10s nach dem USB-Schritt einblenden
-      var help=document.querySelector("#iUSB .help-btn");
+      // "Keine Verbindung?"-Hilfe-Button erst ~10s nach dem Installations-Schritt einblenden
+      var help=document.querySelector("#iInstall .help-btn");
       if(help){
         help.classList.remove("show");
         clearTimeout(helpTimer);
-        if(id==="iUSB"){ helpTimer=setTimeout(function(){ help.classList.add("show"); }, 10000); }
+        if(id==="iInstall"){ helpTimer=setTimeout(function(){ help.classList.add("show"); }, 10000); }
       }
       if(active){ runBoards(active); window.scrollTo({top:0,behavior:"smooth"}); }
       return active;
